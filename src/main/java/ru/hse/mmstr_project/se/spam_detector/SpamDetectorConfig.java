@@ -21,7 +21,7 @@ public class SpamDetectorConfig {
     }
 
     @Bean
-    public HttpClient httpClient() {
+    public HttpClient httpClientForMl() {
         return HttpClient.newHttpClient();
     }
 }
