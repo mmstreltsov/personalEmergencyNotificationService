@@ -31,13 +31,17 @@ public class SpamDetectorManager {
     }
 
     public boolean isSpam(String obj) {
+        if (fallbackSpamDetector.isSpam(obj)) {
+            return true;
+        }
+
         try {
             return CompletableFuture
                     .supplyAsync(() -> spamDetector.isSpam(obj), executor)
                     .get(WAITING_TIME_IN_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.warn("Spam detector failed", e);
-            return fallbackSpamDetector.isSpam(obj);
+            log.info("Spam detector failed", e);
+            return false;
         }
     }
 }

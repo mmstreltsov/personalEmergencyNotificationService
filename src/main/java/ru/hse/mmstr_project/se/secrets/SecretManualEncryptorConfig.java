@@ -1,4 +1,4 @@
-package ru.hse.mmstr_project.se.utils.secrets;
+package ru.hse.mmstr_project.se.secrets;
 
 
 import org.jasypt.encryption.StringEncryptor;

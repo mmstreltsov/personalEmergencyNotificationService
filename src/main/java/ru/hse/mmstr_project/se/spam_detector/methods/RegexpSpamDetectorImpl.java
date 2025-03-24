@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -20,7 +19,7 @@ public class RegexpSpamDetectorImpl implements SpamDetector {
     private List<Pattern> patterns;
     private final String regexFilePath;
 
-    public RegexpSpamDetectorImpl(@Value("spam.regexp.text.file.path") String regexFilePath) {
+    public RegexpSpamDetectorImpl(@Value("${spam.regexp.text.file.path}") String regexFilePath) {
         this.regexFilePath = regexFilePath;
     }
 
@@ -28,7 +27,8 @@ public class RegexpSpamDetectorImpl implements SpamDetector {
     private void loadPatterns()  {
         try (InputStream inputStream = getClass().getResourceAsStream(regexFilePath)) {
             if (inputStream == null) {
-                throw new IOException("File not found: " + regexFilePath);
+                log.error("Failed read file: {}", regexFilePath);
+                return;
             }
 
             List<String> lines = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8).lines().toList();
