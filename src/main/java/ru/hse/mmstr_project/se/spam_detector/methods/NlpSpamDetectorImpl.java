@@ -30,10 +30,10 @@ public class NlpSpamDetectorImpl implements SpamDetector {
 
     public NlpSpamDetectorImpl(
             @Value("${huggingface.token}") String bearerToken,
-            HttpClient client,
+            HttpClient httpClientForMl,
             ObjectMapper objectMapper) {
         BEARER_TOKEN = bearerToken;
-        this.client = client;
+        this.client = httpClientForMl;
         this.objectMapper = objectMapper;
     }
 
