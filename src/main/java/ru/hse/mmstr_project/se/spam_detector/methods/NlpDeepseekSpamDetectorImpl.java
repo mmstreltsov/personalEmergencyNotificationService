@@ -1,6 +1,5 @@
 package ru.hse.mmstr_project.se.spam_detector.methods;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,26 +7,22 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.http.HttpClient;
-import java.util.Map;
 
 @Component
-public class NlpSpamDetectorImpl extends AbstractApiModelsDetectorImpl implements SpamDetector {
+public class NlpDeepseekSpamDetectorImpl extends AbstractApiModelsDetectorImpl implements SpamDetector {
 
-    private static final Logger log = LoggerFactory.getLogger(NlpSpamDetectorImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(NlpDeepseekSpamDetectorImpl.class);
 
-    private static final String API_URL = "https://api-inference.huggingface.co/models/t-bank-ai/ruDialoGPT-small";
+    private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
+    private static final String JSON = "{'model': 'deepseek/deepseek-chat:free',\n" +
+            " 'messages': [{'role': 'user', 'content': '%s'}]}";
     private static final String NLP_PROMPT =
             "Сервис помощи людям в экстренной ситуации. Определи, является ли этот текст спамом, ответь только Да или Нет: ";
-    private static final String YES = "да";
 
-    private final ObjectMapper objectMapper;
-
-    public NlpSpamDetectorImpl(
+    public NlpDeepseekSpamDetectorImpl(
             @Value("${huggingface.token}") String bearerToken,
-            HttpClient httpClientForMl,
-            ObjectMapper objectMapper) {
+            HttpClient httpClientForMl) {
         super(httpClientForMl, bearerToken);
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -41,7 +36,7 @@ public class NlpSpamDetectorImpl extends AbstractApiModelsDetectorImpl implement
     }
 
     private boolean isSpamImpl(String text) throws IOException, InterruptedException {
-        String payload = objectMapper.writeValueAsString(Map.of("inputs", NLP_PROMPT + text));
+        String payload = String.format(JSON, NLP_PROMPT + text);
         return sendRequest(payload, API_URL);
     }
 }

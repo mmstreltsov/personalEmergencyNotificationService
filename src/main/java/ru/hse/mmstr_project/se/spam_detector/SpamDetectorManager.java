@@ -2,10 +2,10 @@ package ru.hse.mmstr_project.se.spam_detector;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import ru.hse.mmstr_project.se.spam_detector.methods.SpamDetector;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -17,28 +17,27 @@ public class SpamDetectorManager {
     private static final long WAITING_TIME_IN_MS = 1_000;
     private static final Logger log = LoggerFactory.getLogger(SpamDetectorManager.class);
 
-    private final SpamDetector spamDetector;
-    private final SpamDetector fallbackSpamDetector;
+    private final List<SpamDetector> spamDetector;
     private final ExecutorService executor;
 
     public SpamDetectorManager(
-            @Qualifier("nlpSpamDetectorImpl") SpamDetector spamDetector,
-            @Qualifier("regexpSpamDetectorImpl") SpamDetector fallbackSpamDetector,
+            List<SpamDetector> spamDetector,
             ExecutorService executor) {
         this.spamDetector = spamDetector;
-        this.fallbackSpamDetector = fallbackSpamDetector;
         this.executor = executor;
     }
 
     public boolean isSpam(String obj) {
-        if (fallbackSpamDetector.isSpam(obj)) {
-            return true;
-        }
+        List<CompletableFuture<Boolean>> list = spamDetector.stream()
+                .map(it -> CompletableFuture.supplyAsync(() -> it.isSpam(obj), executor))
+                .toList();
+
+        CompletableFuture<Boolean> future = CompletableFuture
+                .anyOf(list.toArray(new CompletableFuture[0]))
+                .thenApply(res -> (Boolean) res);
 
         try {
-            return CompletableFuture
-                    .supplyAsync(() -> spamDetector.isSpam(obj), executor)
-                    .get(WAITING_TIME_IN_MS, TimeUnit.MILLISECONDS);
+            return future.get(WAITING_TIME_IN_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
             log.info("Spam detector failed", e);
             return false;
