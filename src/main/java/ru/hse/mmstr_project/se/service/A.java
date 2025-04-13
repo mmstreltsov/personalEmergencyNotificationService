@@ -9,6 +9,8 @@ import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 import ru.hse.mmstr_project.se.storage.common.mapper.ClientMapper;
 import ru.hse.mmstr_project.se.storage.common.repository.ClientRepository;
 import ru.hse.mmstr_project.se.storage.common.repository.ScenarioRepository;
+import ru.hse.mmstr_project.se.storage.common.repository.system.BotRepository;
+import ru.hse.mmstr_project.se.storage.common.repository.system.ChatToBotBotRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,12 +22,16 @@ public class A {
 
     private final ClientRepository clientRepository;
     private final ScenarioRepository scenarioRepository;
+    private final BotRepository botRepository;
+    private final ChatToBotBotRepository chat;
     private final ClientMapper clientMapper;
 
-    public A(ClientRepository clientRepository, ScenarioRepository scenarioRepository,
+    public A(ClientRepository clientRepository, ScenarioRepository scenarioRepository, BotRepository botRepository, ChatToBotBotRepository chat,
              ClientMapper clientMapper) {
         this.clientRepository = clientRepository;
         this.scenarioRepository = scenarioRepository;
+        this.botRepository = botRepository;
+        this.chat = chat;
         this.clientMapper = clientMapper;
     }
 
@@ -59,5 +65,10 @@ public class A {
         scenarioRepository.save(clientMapper.toEntity(ahahhahaha));
 
         System.out.println(scenarioRepository.findAll().stream().map(clientMapper::toDto).toList());
+    }
+
+    public void bots() {
+        System.out.println(botRepository.findAll());
+        System.out.println(chat.findAll());
     }
 }
