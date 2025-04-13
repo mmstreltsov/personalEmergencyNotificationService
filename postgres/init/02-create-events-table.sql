@@ -4,7 +4,7 @@ CREATE TABLE Scenario (
     toIds INTEGER[],
     firstTimeToActivate TIMESTAMP,
     listTimesToActivate TIMESTAMP[],
-    allowedDelayAfterPing INTERVAL,
+    allowedDelayAfterPing INT,
     okFromAntispam BOOLEAN,
     textToPing TEXT
 );
