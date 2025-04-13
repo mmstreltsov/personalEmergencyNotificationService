@@ -5,11 +5,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateClientDto;
+import ru.hse.mmstr_project.se.storage.common.dto.CreateIncidentDto;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
+import ru.hse.mmstr_project.se.storage.common.dto.IncidentDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.entity.Client;
 import ru.hse.mmstr_project.se.storage.common.entity.Friend;
+import ru.hse.mmstr_project.se.storage.common.entity.Incident;
 import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 
 @Mapper
@@ -21,9 +24,9 @@ public interface ClientMapper {
     @Mapping(target = "id", ignore = true)
     Client toEntity(CreateClientDto clientDto);
 
-    FriendDto toFriendDto(Friend friend);
+    FriendDto toDto(Friend friend);
 
-    Friend toFriendEntity(FriendDto friendDto);
+    Friend toEntity(FriendDto friendDto);
 
     ScenarioDto toDto(Scenario scenario);
 
@@ -31,4 +34,11 @@ public interface ClientMapper {
 
     @Mapping(target = "id", ignore = true)
     Scenario toEntity(CreateScenarioDto scenarioDto);
+
+    IncidentDto toDto(Incident incident);
+
+    Incident toEntity(IncidentDto incidentDto);
+
+    @Mapping(target = "id", ignore = true)
+    Incident toEntity(CreateIncidentDto incidentDto);
 }

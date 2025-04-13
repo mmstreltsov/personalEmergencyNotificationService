@@ -1,4 +1,4 @@
-package ru.hse.mmstr_project.se.storage.common.entity.system;
+package ru.hse.mmstr_project.se.storage.common.entity;
 
 
 import jakarta.persistence.Column;
@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 public class ChatToBot {
 
     @Id
+    @Column(name = "chatId")
     private Long chatId;
 
     @Column(name = "botId", nullable = false)

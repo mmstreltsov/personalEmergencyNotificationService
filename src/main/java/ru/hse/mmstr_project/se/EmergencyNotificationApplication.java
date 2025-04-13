@@ -15,6 +15,6 @@ public class EmergencyNotificationApplication {
         ConfigurableApplicationContext run = SpringApplication.run(EmergencyNotificationApplication.class, args);
 
         A bean = run.getBean(A.class);
-        bean.bots();
+        bean.incidents();
     }
 }

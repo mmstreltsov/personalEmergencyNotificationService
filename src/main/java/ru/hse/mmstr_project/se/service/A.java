@@ -4,13 +4,15 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateClientDto;
+import ru.hse.mmstr_project.se.storage.common.dto.CreateIncidentDto;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 import ru.hse.mmstr_project.se.storage.common.mapper.ClientMapper;
+import ru.hse.mmstr_project.se.storage.common.repository.ChatToBotBotRepository;
 import ru.hse.mmstr_project.se.storage.common.repository.ClientRepository;
+import ru.hse.mmstr_project.se.storage.common.repository.IncidentRepository;
 import ru.hse.mmstr_project.se.storage.common.repository.ScenarioRepository;
 import ru.hse.mmstr_project.se.storage.common.repository.system.BotRepository;
-import ru.hse.mmstr_project.se.storage.common.repository.system.ChatToBotBotRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,14 +26,16 @@ public class A {
     private final ScenarioRepository scenarioRepository;
     private final BotRepository botRepository;
     private final ChatToBotBotRepository chat;
+    private final IncidentRepository incidentRepository;
     private final ClientMapper clientMapper;
 
-    public A(ClientRepository clientRepository, ScenarioRepository scenarioRepository, BotRepository botRepository, ChatToBotBotRepository chat,
+    public A(ClientRepository clientRepository, ScenarioRepository scenarioRepository, BotRepository botRepository, ChatToBotBotRepository chat, IncidentRepository incidentRepository,
              ClientMapper clientMapper) {
         this.clientRepository = clientRepository;
         this.scenarioRepository = scenarioRepository;
         this.botRepository = botRepository;
         this.chat = chat;
+        this.incidentRepository = incidentRepository;
         this.clientMapper = clientMapper;
     }
 
@@ -46,7 +50,6 @@ public class A {
                 .build()));
 
         clientRepository.save(clientMapper.toEntity(clientDto));
-        System.out.println("DONE");
         System.out.println(clientRepository.findAll().stream().map(clientMapper::toDto).map(ClientDto::getListOfFriends).toList());
     }
 
@@ -69,6 +72,15 @@ public class A {
 
     public void bots() {
         System.out.println(botRepository.findAll());
+
+
         System.out.println(chat.findAll());
+    }
+
+    public void incidents() {
+        CreateIncidentDto createIncidentDto = new CreateIncidentDto(-1L, 12331.1, 123312.1);
+
+        incidentRepository.save(clientMapper.toEntity(createIncidentDto));
+        System.out.println(incidentRepository.findAll().stream().map(clientMapper::toDto).toList());
     }
 }
