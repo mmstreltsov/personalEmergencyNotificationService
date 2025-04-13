@@ -48,6 +48,7 @@ public class A {
 
         CreateScenarioDto ahahhahaha = new CreateScenarioDto(
                 "",
+                1L,
                 List.of(),
                 LocalDateTime.now(),
                 List.of(LocalDateTime.now().plusDays(1)),

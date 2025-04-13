@@ -4,8 +4,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CreateScenarioDto {
+
     private String text;
-    private List<Long> toIds;
+    private Long clientId;
+    private List<Long> friendIds;
     private LocalDateTime firstTimeToActivate;
     private List<LocalDateTime> listTimesToActivate;
     private Integer allowedDelayAfterPing;
@@ -14,14 +16,16 @@ public class CreateScenarioDto {
 
     public CreateScenarioDto(
             String text,
-            List<Long> toIds,
+            Long clientId,
+            List<Long> friendIds,
             LocalDateTime firstTimeToActivate,
             List<LocalDateTime> listTimesToActivate,
             Integer allowedDelayAfterPing,
             Boolean okFromAntispam,
             String textToPing) {
         this.text = text;
-        this.toIds = toIds;
+        this.clientId = clientId;
+        this.friendIds = friendIds;
         this.firstTimeToActivate = firstTimeToActivate;
         this.listTimesToActivate = listTimesToActivate;
         this.allowedDelayAfterPing = allowedDelayAfterPing;
@@ -37,12 +41,20 @@ public class CreateScenarioDto {
         this.text = text;
     }
 
-    public List<Long> getToIds() {
-        return toIds;
+    public Long getClientId() {
+        return clientId;
     }
 
-    public void setToIds(List<Long> toIds) {
-        this.toIds = toIds;
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
+    }
+
+    public List<Long> getFriendIds() {
+        return friendIds;
+    }
+
+    public void setFriendIds(List<Long> friendIds) {
+        this.friendIds = friendIds;
     }
 
     public LocalDateTime getFirstTimeToActivate() {

@@ -7,7 +7,8 @@ public class ScenarioDto {
 
     private Long id;
     private String text;
-    private List<Long> toIds;
+    private Long clientId;
+    private List<Long> friendsIds;
     private LocalDateTime firstTimeToActivate;
     private List<LocalDateTime> listTimesToActivate;
     private Integer allowedDelayAfterPing;
@@ -20,7 +21,8 @@ public class ScenarioDto {
     public ScenarioDto(
             Long id,
             String text,
-            List<Long> toIds,
+            Long clientId,
+            List<Long> friendsIds,
             LocalDateTime firstTimeToActivate,
             List<LocalDateTime> listTimesToActivate,
             Integer allowedDelayAfterPing,
@@ -28,7 +30,8 @@ public class ScenarioDto {
             String textToPing) {
         this.id = id;
         this.text = text;
-        this.toIds = toIds;
+        this.clientId = clientId;
+        this.friendsIds = friendsIds;
         this.firstTimeToActivate = firstTimeToActivate;
         this.listTimesToActivate = listTimesToActivate;
         this.allowedDelayAfterPing = allowedDelayAfterPing;
@@ -52,12 +55,20 @@ public class ScenarioDto {
         this.text = text;
     }
 
-    public List<Long> getToIds() {
-        return toIds;
+    public Long getClientId() {
+        return clientId;
     }
 
-    public void setToIds(List<Long> toIds) {
-        this.toIds = toIds;
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
+    }
+
+    public List<Long> getFriendsIds() {
+        return friendsIds;
+    }
+
+    public void setFriendsIds(List<Long> friendsIds) {
+        this.friendsIds = friendsIds;
     }
 
     public LocalDateTime getFirstTimeToActivate() {
@@ -105,7 +116,8 @@ public class ScenarioDto {
         return "ScenarioDto{" +
                 "id=" + id +
                 ", text='" + text + '\'' +
-                ", toIds=" + toIds +
+                ", clientId=" + clientId +
+                ", friendsIds=" + friendsIds +
                 ", firstTimeToActivate=" + firstTimeToActivate +
                 ", listTimesToActivate=" + listTimesToActivate +
                 ", allowedDelayAfterPing=" + allowedDelayAfterPing +

@@ -23,9 +23,12 @@ public class Scenario {
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
     private String text;
 
+    @Column(name = "clientId")
+    private Long clientId;
+
     @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "toIds", columnDefinition = "LONG[]")
-    private List<Long> toIds;
+    @Column(name = "friendIds", columnDefinition = "LONG[]")
+    private List<Long> friendsIds;
 
     @Column(name = "firstTimeToActivate")
     private LocalDateTime firstTimeToActivate;
@@ -46,15 +49,18 @@ public class Scenario {
     public Scenario() {
     }
 
-    public Scenario(String text,
-                    List<Long> toIds,
-                    LocalDateTime firstTimeToActivate,
-                    List<LocalDateTime> listTimesToActivate,
-                    Integer allowedDelayAfterPing,
-                    Boolean okFromAntispam,
-                    String textToPing) {
+    public Scenario(
+            String text,
+            Long clientId,
+            List<Long> friendsIds,
+            LocalDateTime firstTimeToActivate,
+            List<LocalDateTime> listTimesToActivate,
+            Integer allowedDelayAfterPing,
+            Boolean okFromAntispam,
+            String textToPing) {
         this.text = text;
-        this.toIds = toIds;
+        this.clientId = clientId;
+        this.friendsIds = friendsIds;
         this.firstTimeToActivate = firstTimeToActivate;
         this.listTimesToActivate = listTimesToActivate;
         this.allowedDelayAfterPing = allowedDelayAfterPing;
@@ -62,7 +68,6 @@ public class Scenario {
         this.textToPing = textToPing;
     }
 
-    // Геттеры и сеттеры
     public Long getId() {
         return id;
     }
@@ -79,12 +84,20 @@ public class Scenario {
         this.text = text;
     }
 
-    public List<Long> getToIds() {
-        return toIds;
+    public Long getClientId() {
+        return clientId;
     }
 
-    public void setToIds(List<Long> toIds) {
-        this.toIds = toIds;
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
+    }
+
+    public List<Long> getFriendsIds() {
+        return friendsIds;
+    }
+
+    public void setFriendsIds(List<Long> toIds) {
+        this.friendsIds = toIds;
     }
 
     public LocalDateTime getFirstTimeToActivate() {
