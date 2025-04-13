@@ -21,8 +21,8 @@ public class A {
     }
 
     public void ahahahah(CreateClientDto clientDto) {
-//        clientRepository.save(clientMapper.toEntity(clientDto));
-//        System.out.println("DONE");
+        clientRepository.save(clientMapper.toEntity(clientDto));
+        System.out.println("DONE");
         System.out.println(clientRepository.findAll().stream().map(clientMapper::toDto).map(ClientDto::getListOfFriends).toList());
     }
 }

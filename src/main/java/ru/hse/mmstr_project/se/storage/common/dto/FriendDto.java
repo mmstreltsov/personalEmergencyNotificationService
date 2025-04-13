@@ -5,7 +5,7 @@ import java.util.List;
 public class FriendDto {
     private Integer id;
     private String name;
-    private List<String> aWayToNotify;
+    private List<String> wayToNotify;
     private String phoneNumber;
     private Integer telegramId;
     private Integer chatId;
@@ -17,14 +17,14 @@ public class FriendDto {
     public FriendDto(
             Integer id,
             String name,
-            List<String> aWayToNotify,
+            List<String> wayToNotify,
             String phoneNumber,
             Integer telegramId,
             Integer chatId,
             String email) {
         this.id = id;
         this.name = name;
-        this.aWayToNotify = aWayToNotify;
+        this.wayToNotify = wayToNotify;
         this.phoneNumber = phoneNumber;
         this.telegramId = telegramId;
         this.chatId = chatId;
@@ -47,12 +47,12 @@ public class FriendDto {
         this.name = name;
     }
 
-    public List<String> getAWayToNotify() {
-        return aWayToNotify;
+    public List<String> getWayToNotify() {
+        return wayToNotify;
     }
 
-    public void setAWayToNotify(List<String> aWayToNotify) {
-        this.aWayToNotify = aWayToNotify;
+    public void setWayToNotify(List<String> aWayToNotify) {
+        this.wayToNotify = aWayToNotify;
     }
 
     public String getPhoneNumber() {
@@ -108,8 +108,8 @@ public class FriendDto {
             return this;
         }
 
-        public Builder aWayToNotify(List<String> aWayToNotify) {
-            friendDto.aWayToNotify = aWayToNotify;
+        public Builder wayToNotify(List<String> wayToNotify) {
+            friendDto.wayToNotify = wayToNotify;
             return this;
         }
 
@@ -143,7 +143,7 @@ public class FriendDto {
         return "FriendDto{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", aWayToNotify=" + aWayToNotify +
+                ", wayToNotify=" + wayToNotify +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", telegramId=" + telegramId +
                 ", chatId=" + chatId +

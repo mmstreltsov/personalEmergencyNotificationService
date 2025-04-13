@@ -10,6 +10,7 @@ import ru.hse.mmstr_project.se.storage.common.dto.CreateClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 
 import java.util.List;
+import java.util.Random;
 
 @SpringBootApplication
 @EnableEncryptableProperties
@@ -19,11 +20,11 @@ public class EmergencyNotificationApplication {
         ConfigurableApplicationContext run = SpringApplication.run(EmergencyNotificationApplication.class, args);
 
         A bean = run.getBean(A.class);
-        bean.ahahahah(new CreateClientDto(113L, 123L, List.of(FriendDto.builder()
+        bean.ahahahah(new CreateClientDto(new Random().nextLong(), 123L, List.of(FriendDto.builder()
                 .id(1)
                 .name("ahahah")
                 .chatId(1)
-                .aWayToNotify(List.of("tg"))
+                .wayToNotify(List.of("tg", "ahahahhaha"))
                 .phoneNumber("+1")
                 .build())));
     }

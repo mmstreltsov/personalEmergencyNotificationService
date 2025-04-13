@@ -1,16 +1,18 @@
 package ru.hse.mmstr_project.se.storage.common.entity;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Friend {
     @JsonProperty("id")
     private Integer id;
     @JsonProperty("name")
     private String name;
-    @JsonProperty("aWayToNotify")
-    private List<String> aWayToNotify;
+    @JsonProperty("wayToNotify")
+    private List<String> wayToNotify;
     @JsonProperty("phoneNumber")
     private String phoneNumber;
     @JsonProperty("telegramId")
@@ -39,12 +41,12 @@ public class Friend {
         this.name = name;
     }
 
-    public List<String> getAWayToNotify() {
-        return aWayToNotify;
+    public List<String> geAWayToNotify() {
+        return wayToNotify;
     }
 
-    public void setAWayToNotify(List<String> aWayToNotify) {
-        this.aWayToNotify = aWayToNotify;
+    public void setWayToNotify(List<String> aWayToNotify) {
+        this.wayToNotify = aWayToNotify;
     }
 
     public String getPhoneNumber() {

@@ -7,7 +7,7 @@ CREATE TABLE Clients (
 --  {
 --    "id": <integer>,
 --    "name": <string>,
---    "aWayToNotify": [
+--    "wayToNotify": [
 --      <string>
 --    ],
 --    "phoneNumber": <string>,
