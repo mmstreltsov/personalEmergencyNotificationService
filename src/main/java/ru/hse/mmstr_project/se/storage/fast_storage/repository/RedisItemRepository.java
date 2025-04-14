@@ -79,7 +79,7 @@ public class RedisItemRepository {
     }
 
     public Optional<IncidentMetadataDto> findById(Long id) {
-        return Optional.of((IncidentMetadataDto) redisTemplate.opsForValue().get(KEY_PREFIX + id));
+        return Optional.ofNullable((IncidentMetadataDto) redisTemplate.opsForValue().get(KEY_PREFIX + id));
     }
 
     private List<IncidentMetadataDto> getEntitiesByIds(List<Long> ids) {
