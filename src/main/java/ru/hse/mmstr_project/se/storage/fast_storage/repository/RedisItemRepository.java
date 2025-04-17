@@ -5,6 +5,7 @@ import org.springframework.stereotype.Repository;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,38 +41,31 @@ public class RedisItemRepository {
                 redisTemplate.expire(key, 1, TimeUnit.HOURS);
             }
         }
+
         for (IncidentMetadataDto entity : entities) {
             redisTemplate.opsForZSet().add(
                     TIME_SORTED_SET,
                     entity.id().toString(),
                     entity.firstTimeToActivate());
         }
-        redisTemplate.expire(TIME_SORTED_SET, 1, TimeUnit.HOURS);
     }
 
     public void save(IncidentMetadataDto entity) {
-        String id = entity.id().toString();
-
-        redisTemplate.opsForValue().set(KEY_PREFIX + id, entity);
-        redisTemplate.expire(KEY_PREFIX + id, 1, TimeUnit.HOURS);
-
-        redisTemplate.opsForZSet().add(
-                TIME_SORTED_SET,
-                entity.id().toString(),
-                entity.firstTimeToActivate()
-        );
+        saveAll(Collections.singletonList(entity));
     }
 
-    public List<IncidentMetadataDto> findByFirstTimeToActivateLessThan(long thresholdTime) {
-        Set<String> idStrings = redisTemplate.opsForZSet().rangeByScore(
-                        TIME_SORTED_SET,
-                        0,
-                        thresholdTime - 1)
-                .stream()
-                .map(it -> (String) it)
-                .collect(Collectors.toSet());
+    public List<IncidentMetadataDto> findByFirstTimeToActivateLessThan(long startTime, int interval) {
+        Set<Object> eventIds = redisTemplate.opsForZSet().rangeByScore(
+                TIME_SORTED_SET,
+                startTime,
+                startTime + interval);
 
-        List<Long> ids = idStrings.stream()
+        if (eventIds.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> ids = eventIds.stream()
+                .map(it -> (String) it)
                 .map(Long::parseLong)
                 .collect(Collectors.toList());
 
