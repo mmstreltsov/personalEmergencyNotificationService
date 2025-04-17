@@ -61,7 +61,7 @@ public class CommonScheduler {
                     .forEachRemaining(scenarios -> {
                         List<ScenarioDto> scenarioDtos = scenarios.stream().map(clientMapper::toDto).toList();
                         // do smth
-                        scenarioDtos.forEach(System.out::println);
+                        scenarioDtos.forEach(a -> taskExecutor.execute(() -> System.out.println(a)));
 
                         updateObjectsToNextPing(scenarioDtos);
                     });
