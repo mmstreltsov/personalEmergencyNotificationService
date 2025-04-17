@@ -1,9 +1,11 @@
 package ru.hse.mmstr_project.se.shedulers;
 
+import com.google.common.collect.Iterators;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
 import ru.hse.mmstr_project.se.storage.common.mapper.ClientMapper;
@@ -13,6 +15,7 @@ import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateR
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
@@ -21,6 +24,7 @@ public class CommonScheduler {
 
     private static final String SCHEDULER_NAME = "CommonScheduler";
     private static final int SECONDS_TO_SCAN = 10;
+    private static final int BATCH_SIZE = 128;
 
     private final Executor taskExecutor;
     private final ScenarioRepository scenarioRepository;
@@ -51,9 +55,30 @@ public class CommonScheduler {
         try (Stream<Scenario> stream = scenarioRepository.streamScenariosInTimeRange(
                 LocalDateTime.from(Instant.ofEpochMilli(from)),
                 LocalDateTime.from(Instant.ofEpochMilli(to)))) {
-            stream.map(clientMapper::toDto).forEach(a -> taskExecutor.execute(() -> System.out.println(a)));
+
+
+            Iterators.partition(stream.iterator(), BATCH_SIZE)
+                    .forEachRemaining(scenarios -> {
+                        List<ScenarioDto> scenarioDtos = scenarios.stream().map(clientMapper::toDto).toList();
+                        // do smth
+                        scenarioDtos.forEach(System.out::println);
+
+                        updateObjectsToNextPing(scenarioDtos);
+                    });
         }
         saveLastProcessedTime(to);
+    }
+
+    private void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
+        scenarios.forEach(scenarioDto -> {
+            LocalDateTime nextTime = scenarioDto
+                    .getListTimesToActivate()
+                    .stream()
+                    .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))
+                    .reduce(scenarioDto.getFirstTimeToActivate(), (a, b) -> a.isBefore(b) ? a : b);
+            scenarioDto.setFirstTimeToActivate(nextTime);
+        });
+        scenarioRepository.saveAll(scenarios.stream().map(clientMapper::toEntity).toList());
     }
 
     @Transactional
