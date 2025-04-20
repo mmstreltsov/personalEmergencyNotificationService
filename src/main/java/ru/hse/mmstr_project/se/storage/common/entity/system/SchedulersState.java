@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "schedulers")
 public class SchedulersState {
@@ -13,12 +15,12 @@ public class SchedulersState {
     private Long id;
 
     @Column(name = "fetchTime")
-    private Long fetchTime;
+    private Instant fetchTime;
 
     public SchedulersState() {
     }
 
-    public SchedulersState(Long id, Long fetchTime) {
+    public SchedulersState(Long id, Instant fetchTime) {
         this.id = id;
         this.fetchTime = fetchTime;
     }
@@ -31,11 +33,11 @@ public class SchedulersState {
         this.id = id;
     }
 
-    public Long getFetchTime() {
+    public Instant getFetchTime() {
         return fetchTime;
     }
 
-    public void setFetchTime(Long fetchTime) {
+    public void setFetchTime(Instant fetchTime) {
         this.fetchTime = fetchTime;
     }
 }

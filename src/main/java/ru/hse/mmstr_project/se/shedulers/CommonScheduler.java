@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public class CommonScheduler {
 
     private static final long SCHEDULER_ID = 1;
-    private static final int SECONDS_TO_SCAN = 10;
+    private static final int SECONDS_TO_EXTRA_SCAN = 10;
     private static final int BATCH_SIZE = 128;
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
@@ -58,28 +58,25 @@ public class CommonScheduler {
             ));
         }
 
-        long from = getLastProcessedTime();
-        long to = Instant.now().plus(SECONDS_TO_SCAN, ChronoUnit.SECONDS).toEpochMilli();
+        Instant from = getLastProcessedTime();
+        Instant to = Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
 
-        if (from >= to) {
+        if (!from.isBefore(to)) {
             return;
         }
 
-        try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(
-                Instant.ofEpochMilli(from),
-                Instant.ofEpochMilli(to))) {
-
+        try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
             Iterators.partition(stream.iterator(), BATCH_SIZE)
                     .forEachRemaining(scenarios -> {
                         taskExecutor.execute(() -> manager.handle(scenarios));
-                        updateObjectsToNextPing(scenarios);
+                        updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
                     });
         }
         saveLastProcessedTime(to);
     }
 
     @Transactional
-    protected void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
+    protected void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {
         List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
             Instant nextTime = scenarioDto
                     .getListTimesToActivate()
@@ -87,21 +84,21 @@ public class CommonScheduler {
                     .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))
                     .reduce(NEVER, (a, b) -> a.isBefore(b) ? a : b);
             return scenarioDto.toBuilder()
-                    .firstTimeToActivate(nextTime)
+                    .firstTimeToActivate(nextTime.isAfter(minimalValue) ? nextTime : minimalValue)
                     .build();
         }).toList();
         scenarioStorage.saveAll(dtos);
     }
 
     @Transactional
-    protected void saveLastProcessedTime(long time) {
+    protected void saveLastProcessedTime(Instant time) {
         schedulersStateRepository.save(new SchedulersState(SCHEDULER_ID, time));
     }
 
     @Transactional(readOnly = true)
-    protected long getLastProcessedTime() {
+    protected Instant getLastProcessedTime() {
         return schedulersStateRepository.findById(SCHEDULER_ID)
                 .map(SchedulersState::getFetchTime)
-                .orElse(Instant.now().toEpochMilli());
+                .orElse(Instant.now());
     }
 }
