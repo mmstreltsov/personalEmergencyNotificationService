@@ -25,6 +25,7 @@ public class CommonScheduler {
     private static final long SCHEDULER_ID = 1;
     private static final int SECONDS_TO_SCAN = 10;
     private static final int BATCH_SIZE = 128;
+    private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     private final Executor taskExecutor;
     private final ScenarioRepository scenarioRepository;
@@ -82,7 +83,6 @@ public class CommonScheduler {
                     true,
                     "heh"
             )));
-
         }
     }
 
@@ -92,7 +92,7 @@ public class CommonScheduler {
                     .getListTimesToActivate()
                     .stream()
                     .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))
-                    .reduce(scenarioDto.getFirstTimeToActivate(), (a, b) -> a.isBefore(b) ? a : b);
+                    .reduce(NEVER, (a, b) -> a.isBefore(b) ? a : b);
             scenarioDto.setFirstTimeToActivate(nextTime);
         });
         scenarioRepository.saveAll(scenarios.stream().map(clientMapper::toEntity).toList());
