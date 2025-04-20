@@ -5,12 +5,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
+import ru.hse.mmstr_project.se.service.CommonSchedulerManager;
+import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
-import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
-import ru.hse.mmstr_project.se.storage.common.mapper.ClientMapper;
-import ru.hse.mmstr_project.se.storage.common.repository.ScenarioRepository;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
 
 import java.time.Instant;
@@ -28,26 +26,24 @@ public class CommonScheduler {
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     private final Executor taskExecutor;
-    private final ScenarioRepository scenarioRepository;
+    private final ScenarioStorage scenarioStorage;
     private final SchedulersStateRepository schedulersStateRepository;
-    private final ClientMapper clientMapper;
+    private final CommonSchedulerManager manager;
 
     public CommonScheduler(
             @Qualifier("taskExecutor") Executor taskExecutor,
-            ScenarioRepository scenarioRepository,
+            ScenarioStorage scenarioStorage,
             SchedulersStateRepository schedulersStateRepository,
-            ClientMapper clientMapper) {
+            CommonSchedulerManager manager) {
         this.taskExecutor = taskExecutor;
-        this.scenarioRepository = scenarioRepository;
+        this.scenarioStorage = scenarioStorage;
         this.schedulersStateRepository = schedulersStateRepository;
-        this.clientMapper = clientMapper;
+        this.manager = manager;
     }
 
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan.fixed-delay}")
     @Transactional
     public void ahahah() {
-        tempI();
-
         long from = getLastProcessedTime();
         long to = Instant.now().plus(SECONDS_TO_SCAN, ChronoUnit.SECONDS).toEpochMilli();
 
@@ -55,35 +51,17 @@ public class CommonScheduler {
             return;
         }
 
-        try (Stream<Scenario> stream = scenarioRepository.streamScenariosInTimeRange(
+        try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(
                 Instant.ofEpochMilli(from),
                 Instant.ofEpochMilli(to))) {
 
             Iterators.partition(stream.iterator(), BATCH_SIZE)
                     .forEachRemaining(scenarios -> {
-                        List<ScenarioDto> scenarioDtos = scenarios.stream().map(clientMapper::toDto).toList();
-                        // do smth
-                        scenarioDtos.forEach(a -> taskExecutor.execute(() -> System.out.println(a)));
-
-                        updateObjectsToNextPing(scenarioDtos);
+                        taskExecutor.execute(() -> manager.handle(scenarios));
+                        updateObjectsToNextPing(scenarios);
                     });
         }
         saveLastProcessedTime(to);
-    }
-
-    private void tempI() {
-        for (int i = 0; i < 7; i++) {
-            scenarioRepository.save(clientMapper.toEntity(new CreateScenarioDto(
-                    "aahahhahahah",
-                    -1L,
-                    List.of(),
-                    Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS),
-                    List.of(Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS), Instant.now().plus(22 + 10 * i, ChronoUnit.SECONDS)),
-                    -1,
-                    true,
-                    "heh"
-            )));
-        }
     }
 
     private void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
@@ -95,7 +73,7 @@ public class CommonScheduler {
                     .reduce(NEVER, (a, b) -> a.isBefore(b) ? a : b);
             scenarioDto.setFirstTimeToActivate(nextTime);
         });
-        scenarioRepository.saveAll(scenarios.stream().map(clientMapper::toEntity).toList());
+        scenarioStorage.saveAll(scenarios);
     }
 
     @Transactional
