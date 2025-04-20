@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 @Entity
@@ -31,11 +31,11 @@ public class Scenario {
     private List<Long> friendsIds;
 
     @Column(name = "firstTimeToActivate")
-    private LocalDateTime firstTimeToActivate;
+    private Instant firstTimeToActivate;
 
     @JdbcTypeCode(SqlTypes.ARRAY)
     @Column(name = "listTimesToActivate", columnDefinition = "TIMESTAMP[]")
-    private List<LocalDateTime> listTimesToActivate;
+    private List<Instant> listTimesToActivate;
 
     @Column(name = "allowedDelayAfterPing")
     private Integer allowedDelayAfterPing;
@@ -53,8 +53,8 @@ public class Scenario {
             String text,
             Long clientId,
             List<Long> friendsIds,
-            LocalDateTime firstTimeToActivate,
-            List<LocalDateTime> listTimesToActivate,
+            Instant firstTimeToActivate,
+            List<Instant> listTimesToActivate,
             Integer allowedDelayAfterPing,
             Boolean okFromAntispam,
             String textToPing) {
@@ -100,19 +100,19 @@ public class Scenario {
         this.friendsIds = toIds;
     }
 
-    public LocalDateTime getFirstTimeToActivate() {
+    public Instant getFirstTimeToActivate() {
         return firstTimeToActivate;
     }
 
-    public void setFirstTimeToActivate(LocalDateTime firstTimeToActivate) {
+    public void setFirstTimeToActivate(Instant firstTimeToActivate) {
         this.firstTimeToActivate = firstTimeToActivate;
     }
 
-    public List<LocalDateTime> getListTimesToActivate() {
+    public List<Instant> getListTimesToActivate() {
         return listTimesToActivate;
     }
 
-    public void setListTimesToActivate(List<LocalDateTime> listTimesToActivate) {
+    public void setListTimesToActivate(List<Instant> listTimesToActivate) {
         this.listTimesToActivate = listTimesToActivate;
     }
 
