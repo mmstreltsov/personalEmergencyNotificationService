@@ -10,7 +10,7 @@ import jakarta.persistence.Table;
 public class SchedulersState {
 
     @Id
-    private String id;
+    private Long id;
 
     @Column(name = "fetchTime")
     private Long fetchTime;
@@ -18,16 +18,16 @@ public class SchedulersState {
     public SchedulersState() {
     }
 
-    public SchedulersState(String id, Long fetchTime) {
+    public SchedulersState(Long id, Long fetchTime) {
         this.id = id;
         this.fetchTime = fetchTime;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

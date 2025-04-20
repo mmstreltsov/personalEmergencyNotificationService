@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
 
 @Repository
-public interface SchedulersStateRepository extends JpaRepository<SchedulersState, String> {
+public interface SchedulersStateRepository extends JpaRepository<SchedulersState, Long> {
 }

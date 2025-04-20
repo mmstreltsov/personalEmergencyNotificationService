@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 @Component
 public class CommonScheduler {
 
-    private static final String SCHEDULER_NAME = "CommonScheduler";
+    private static final long SCHEDULER_ID = 1;
     private static final int SECONDS_TO_SCAN = 10;
     private static final int BATCH_SIZE = 128;
 
@@ -102,12 +102,12 @@ public class CommonScheduler {
 
     @Transactional
     protected void saveLastProcessedTime(long time) {
-        schedulersStateRepository.save(new SchedulersState(SCHEDULER_NAME, time));
+        schedulersStateRepository.save(new SchedulersState(SCHEDULER_ID, time));
     }
 
     @Transactional(readOnly = true)
     protected long getLastProcessedTime() {
-        return schedulersStateRepository.findById(SCHEDULER_NAME)
+        return schedulersStateRepository.findById(SCHEDULER_ID)
                 .map(SchedulersState::getFetchTime)
                 .orElse(Instant.now().toEpochMilli());
     }
