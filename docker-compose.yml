@@ -1,6 +1,33 @@
 version: '3.9'
 
 services:
+  app:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    container_name: spring_app
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
+      - SPRING_DATA_REDIS_HOST=redis
+      - JASYPT_MY_MAIN_SECRET_IS=${JASYPT_MY_MAIN_SECRET_IS}
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
   postgres:
     image: postgres:latest
     container_name: postgres_container
@@ -13,6 +40,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data/
       - ./postgres/init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
     deploy:
       resources:
         limits:
