@@ -46,6 +46,7 @@ public class CommonSchedulerManager {
                         .map(client -> IncidentMetadataDto.parse(scenario, client)))
                 .flatMap(Optional::stream)
                 .toList();
+
         redisItemRepository.saveAll(data);
 
         // add notify to main user

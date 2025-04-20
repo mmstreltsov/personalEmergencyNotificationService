@@ -1,5 +1,6 @@
 package ru.hse.mmstr_project.se.service.storage;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
@@ -21,14 +22,17 @@ public class ScenarioStorage {
         this.clientMapper = clientMapper;
     }
 
+    @Transactional
     public void saveAll(Collection<ScenarioDto> scenarioDtos) {
         scenarioRepository.saveAll(scenarioDtos.stream().map(clientMapper::toEntity).toList());
     }
 
+    @Transactional
     public void save(CreateScenarioDto scenarioDto) {
         scenarioRepository.save(clientMapper.toEntity(scenarioDto));
     }
 
+    @Transactional
     public Stream<ScenarioDto> streamScenariosInTimeRange(Instant startTime, Instant endTime) {
         return scenarioRepository.streamScenariosInTimeRange(startTime, endTime).map(clientMapper::toDto);
     }

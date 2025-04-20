@@ -18,6 +18,19 @@ public class ScenarioDto {
     public ScenarioDto() {
     }
 
+    private ScenarioDto(Builder builder) {
+        this(
+                builder.id,
+                builder.text,
+                builder.clientId,
+                builder.friendsIds,
+                builder.firstTimeToActivate,
+                builder.listTimesToActivate,
+                builder.allowedDelayAfterPing,
+                builder.okFromAntispam,
+                builder.textToPing);
+    }
+
     public ScenarioDto(
             Long id,
             String text,
@@ -110,6 +123,88 @@ public class ScenarioDto {
     public void setTextToPing(String textToPing) {
         this.textToPing = textToPing;
     }
+
+    public Builder toBuilder() {
+        return new Builder()
+                .id(this.id)
+                .text(this.text)
+                .clientId(this.clientId)
+                .friendsIds(this.friendsIds)
+                .firstTimeToActivate(this.firstTimeToActivate)
+                .listTimesToActivate(this.listTimesToActivate)
+                .allowedDelayAfterPing(this.allowedDelayAfterPing)
+                .okFromAntispam(this.okFromAntispam)
+                .textToPing(this.textToPing);
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Long id;
+        private String text;
+        private Long clientId;
+        private List<Long> friendsIds;
+        private Instant firstTimeToActivate;
+        private List<Instant> listTimesToActivate;
+        private Integer allowedDelayAfterPing;
+        private Boolean okFromAntispam;
+        private String textToPing;
+
+        private Builder() {
+        }
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder text(String text) {
+            this.text = text;
+            return this;
+        }
+
+        public Builder clientId(Long clientId) {
+            this.clientId = clientId;
+            return this;
+        }
+
+        public Builder friendsIds(List<Long> friendsIds) {
+            this.friendsIds = friendsIds;
+            return this;
+        }
+
+        public Builder firstTimeToActivate(Instant firstTimeToActivate) {
+            this.firstTimeToActivate = firstTimeToActivate;
+            return this;
+        }
+
+        public Builder listTimesToActivate(List<Instant> listTimesToActivate) {
+            this.listTimesToActivate = listTimesToActivate;
+            return this;
+        }
+
+        public Builder allowedDelayAfterPing(Integer allowedDelayAfterPing) {
+            this.allowedDelayAfterPing = allowedDelayAfterPing;
+            return this;
+        }
+
+        public Builder okFromAntispam(Boolean okFromAntispam) {
+            this.okFromAntispam = okFromAntispam;
+            return this;
+        }
+
+        public Builder textToPing(String textToPing) {
+            this.textToPing = textToPing;
+            return this;
+        }
+
+        public ScenarioDto build() {
+            return new ScenarioDto(this);
+        }
+    }
+
 
     @Override
     public String toString() {

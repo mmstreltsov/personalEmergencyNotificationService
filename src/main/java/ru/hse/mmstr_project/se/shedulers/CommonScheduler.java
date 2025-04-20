@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.service.CommonSchedulerManager;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
+import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
@@ -44,6 +45,19 @@ public class CommonScheduler {
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan.fixed-delay}")
     @Transactional
     public void ahahah() {
+        for (int i = 0; i < 7; i++) {
+            scenarioStorage.save(new CreateScenarioDto(
+                    "aahahhahahah",
+                    1L,
+                    List.of(),
+                    Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS),
+                    List.of(Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS), Instant.now().plus(22 + 10 * i, ChronoUnit.SECONDS)),
+                    -1,
+                    true,
+                    "heh"
+            ));
+        }
+
         long from = getLastProcessedTime();
         long to = Instant.now().plus(SECONDS_TO_SCAN, ChronoUnit.SECONDS).toEpochMilli();
 
@@ -64,16 +78,19 @@ public class CommonScheduler {
         saveLastProcessedTime(to);
     }
 
-    private void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
-        scenarios.forEach(scenarioDto -> {
+    @Transactional
+    protected void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
+        List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
             Instant nextTime = scenarioDto
                     .getListTimesToActivate()
                     .stream()
                     .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))
                     .reduce(NEVER, (a, b) -> a.isBefore(b) ? a : b);
-            scenarioDto.setFirstTimeToActivate(nextTime);
-        });
-        scenarioStorage.saveAll(scenarios);
+            return scenarioDto.toBuilder()
+                    .firstTimeToActivate(nextTime)
+                    .build();
+        }).toList();
+        scenarioStorage.saveAll(dtos);
     }
 
     @Transactional
