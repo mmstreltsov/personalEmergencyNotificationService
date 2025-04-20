@@ -14,7 +14,6 @@ import ru.hse.mmstr_project.se.storage.common.repository.ScenarioRepository;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -56,9 +55,8 @@ public class CommonScheduler {
         }
 
         try (Stream<Scenario> stream = scenarioRepository.streamScenariosInTimeRange(
-                LocalDateTime.from(Instant.ofEpochMilli(from)),
-                LocalDateTime.from(Instant.ofEpochMilli(to)))) {
-
+                Instant.ofEpochMilli(from),
+                Instant.ofEpochMilli(to))) {
 
             Iterators.partition(stream.iterator(), BATCH_SIZE)
                     .forEachRemaining(scenarios -> {
@@ -78,8 +76,8 @@ public class CommonScheduler {
                     "aahahhahahah",
                     -1L,
                     List.of(),
-                    LocalDateTime.now().plus(7 + 11 * i, ChronoUnit.SECONDS),
-                    List.of(LocalDateTime.now().plus(7 + 11 * i, ChronoUnit.SECONDS), LocalDateTime.now().plus(22 + 10 * i, ChronoUnit.SECONDS)),
+                    Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS),
+                    List.of(Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS), Instant.now().plus(22 + 10 * i, ChronoUnit.SECONDS)),
                     -1,
                     true,
                     "heh"
@@ -90,7 +88,7 @@ public class CommonScheduler {
 
     private void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
         scenarios.forEach(scenarioDto -> {
-            LocalDateTime nextTime = scenarioDto
+            Instant nextTime = scenarioDto
                     .getListTimesToActivate()
                     .stream()
                     .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))

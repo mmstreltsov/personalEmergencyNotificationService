@@ -1,6 +1,6 @@
 package ru.hse.mmstr_project.se.storage.common.dto;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public class ScenarioDto {
@@ -9,8 +9,8 @@ public class ScenarioDto {
     private String text;
     private Long clientId;
     private List<Long> friendsIds;
-    private LocalDateTime firstTimeToActivate;
-    private List<LocalDateTime> listTimesToActivate;
+    private Instant firstTimeToActivate;
+    private List<Instant> listTimesToActivate;
     private Integer allowedDelayAfterPing;
     private Boolean okFromAntispam;
     private String textToPing;
@@ -23,8 +23,8 @@ public class ScenarioDto {
             String text,
             Long clientId,
             List<Long> friendsIds,
-            LocalDateTime firstTimeToActivate,
-            List<LocalDateTime> listTimesToActivate,
+            Instant firstTimeToActivate,
+            List<Instant> listTimesToActivate,
             Integer allowedDelayAfterPing,
             Boolean okFromAntispam,
             String textToPing) {
@@ -71,19 +71,19 @@ public class ScenarioDto {
         this.friendsIds = friendsIds;
     }
 
-    public LocalDateTime getFirstTimeToActivate() {
+    public Instant getFirstTimeToActivate() {
         return firstTimeToActivate;
     }
 
-    public void setFirstTimeToActivate(LocalDateTime firstTimeToActivate) {
+    public void setFirstTimeToActivate(Instant firstTimeToActivate) {
         this.firstTimeToActivate = firstTimeToActivate;
     }
 
-    public List<LocalDateTime> getListTimesToActivate() {
+    public List<Instant> getListTimesToActivate() {
         return listTimesToActivate;
     }
 
-    public void setListTimesToActivate(List<LocalDateTime> listTimesToActivate) {
+    public void setListTimesToActivate(List<Instant> listTimesToActivate) {
         this.listTimesToActivate = listTimesToActivate;
     }
 
