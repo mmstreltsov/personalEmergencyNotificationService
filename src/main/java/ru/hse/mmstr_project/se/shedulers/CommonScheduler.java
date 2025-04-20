@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
@@ -45,6 +46,8 @@ public class CommonScheduler {
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan.fixed-delay}")
     @Transactional
     public void ahahah() {
+        tempI();
+
         long from = getLastProcessedTime();
         long to = Instant.now().plus(SECONDS_TO_SCAN, ChronoUnit.SECONDS).toEpochMilli();
 
@@ -67,6 +70,22 @@ public class CommonScheduler {
                     });
         }
         saveLastProcessedTime(to);
+    }
+
+    private void tempI() {
+        for (int i = 0; i < 7; i++) {
+            scenarioRepository.save(clientMapper.toEntity(new CreateScenarioDto(
+                    "aahahhahahah",
+                    -1L,
+                    List.of(),
+                    LocalDateTime.now().plus(7 + 11 * i, ChronoUnit.SECONDS),
+                    List.of(LocalDateTime.now().plus(7 + 11 * i, ChronoUnit.SECONDS), LocalDateTime.now().plus(22 + 10 * i, ChronoUnit.SECONDS)),
+                    -1,
+                    true,
+                    "heh"
+            )));
+
+        }
     }
 
     private void updateObjectsToNextPing(List<ScenarioDto> scenarios) {
