@@ -3,24 +3,24 @@ package ru.hse.mmstr_project.se.storage.common.dto;
 import java.util.List;
 
 public class CreateClientDto {
-    private Long telegramId;
+    private String telegramId;
     private Long chatId;
     private List<FriendDto> listOfFriends;
 
     public CreateClientDto() {
     }
 
-    public CreateClientDto(Long telegramId, Long chatId, List<FriendDto> listOfFriends) {
+    public CreateClientDto(String telegramId, Long chatId, List<FriendDto> listOfFriends) {
         this.telegramId = telegramId;
         this.chatId = chatId;
         this.listOfFriends = listOfFriends;
     }
 
-    public Long getTelegramId() {
+    public String getTelegramId() {
         return telegramId;
     }
 
-    public void setTelegramId(Long telegramId) {
+    public void setTelegramId(String telegramId) {
         this.telegramId = telegramId;
     }
 

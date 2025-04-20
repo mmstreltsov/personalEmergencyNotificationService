@@ -22,7 +22,7 @@ public class EmergencyNotificationApplication {
         ConfigurableApplicationContext run = SpringApplication.run(EmergencyNotificationApplication.class, args);
 
         try {
-            run.getBean(ClientStorage.class).save(new CreateClientDto(1L, 11L, List.of()));
+            run.getBean(ClientStorage.class).save(new CreateClientDto("1", 11L, List.of()));
         } catch (Exception ignored) {}
     }
 }

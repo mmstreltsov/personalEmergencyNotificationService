@@ -4,14 +4,14 @@ import java.util.List;
 
 public class ClientDto {
     private Long id;
-    private Long telegramId;
+    private String telegramId;
     private Long chatId;
     private List<FriendDto> listOfFriends;
 
     public ClientDto() {
     }
 
-    public ClientDto(Long id, Long telegramId, Long chatId, List<FriendDto> listOfFriends) {
+    public ClientDto(Long id, String telegramId, Long chatId, List<FriendDto> listOfFriends) {
         this.id = id;
         this.telegramId = telegramId;
         this.chatId = chatId;
@@ -26,11 +26,11 @@ public class ClientDto {
         this.id = id;
     }
 
-    public Long getTelegramId() {
+    public String getTelegramId() {
         return telegramId;
     }
 
-    public void setTelegramId(Long telegramId) {
+    public void setTelegramId(String telegramId) {
         this.telegramId = telegramId;
     }
 

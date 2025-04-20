@@ -13,7 +13,7 @@ public record IncidentMetadataDto(
         List<Long> listTimesToActivate,
         Integer allowedDelayAfterPing,
         String textToPing,
-        Long telegramId,
+        String telegramId,
         Long chatId,
         List<FriendMetaDto> listOfFriends
 ) {
