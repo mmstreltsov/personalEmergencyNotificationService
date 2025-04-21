@@ -2,6 +2,7 @@ package ru.hse.mmstr_project.se.service;
 
 import org.springframework.stereotype.Service;
 import ru.hse.mmstr_project.se.service.storage.ClientStorage;
+import ru.hse.mmstr_project.se.shedulers.CommonSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
@@ -20,15 +21,22 @@ public class CommonSchedulerManager {
 
     private final RedisItemRepository redisItemRepository;
     private final ClientStorage clientStorage;
+    private final CommonSchedulersMetrics commonSchedulersMetrics;
 
     public CommonSchedulerManager(
             RedisItemRepository redisItemRepository,
-            ClientStorage clientStorage) {
+            ClientStorage clientStorage,
+            CommonSchedulersMetrics commonSchedulersMetrics) {
         this.redisItemRepository = redisItemRepository;
         this.clientStorage = clientStorage;
+        this.commonSchedulersMetrics = commonSchedulersMetrics;
     }
 
     public void handle(Collection<ScenarioDto> scenarios) {
+        commonSchedulersMetrics.measureRequest(() -> handleI(scenarios));
+    }
+
+    private void handleI(Collection<ScenarioDto> scenarios) {
         List<ScenarioDto> processedScenarios = scenarios.stream()
                 .filter(ScenarioDto::getOkFromAntispam)
                 .toList();
