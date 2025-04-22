@@ -9,11 +9,20 @@ import java.util.concurrent.Executor;
 @Configuration
 public class SchedulersContext {
 
-    @Bean(name = "taskExecutor")
-    public Executor taskExecutor() {
+    @Bean(name = "taskExecutorForCommonStorage")
+    public Executor taskExecutorForCommonStorage() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(5);
-        executor.setThreadNamePrefix("data-processor-");
+        executor.setThreadNamePrefix("common-data-processor-");
+        executor.initialize();
+        return executor;
+    }
+
+    @Bean(name = "taskExecutorForFastStorage")
+    public Executor taskExecutorForFastStorage() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setThreadNamePrefix("fast-data-processor-");
         executor.initialize();
         return executor;
     }

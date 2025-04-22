@@ -4,9 +4,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -20,6 +22,7 @@ public class RedisItemRepository {
 
     private static final String KEY_PREFIX = "incident:";
     private static final String TIME_SORTED_SET = "incident:time-index";
+    private static final String DEDUP_SET = "dedup:";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -34,42 +37,65 @@ public class RedisItemRepository {
             entityMap.put(KEY_PREFIX + id, entity);
         }
 
-        if (!entityMap.isEmpty()) {
-            redisTemplate.opsForValue().multiSet(entityMap);
-
-            for (String key : entityMap.keySet()) {
-                redisTemplate.expire(key, 1, TimeUnit.HOURS);
-            }
+        if (entityMap.isEmpty()) {
+            return;
         }
+        redisTemplate.opsForValue().multiSet(entityMap);
 
-        for (IncidentMetadataDto entity : entities) {
+        entityMap.forEach((key, value) -> {
+            redisTemplate.expire(key, value.allowedDelayAfterPing() + 5, TimeUnit.MINUTES);
             redisTemplate.opsForZSet().add(
                     TIME_SORTED_SET,
-                    entity.id().toString(),
-                    entity.firstTimeToActivate());
-        }
+                    value.id(),
+                    value.firstTimeToActivate());
+        });
     }
 
     public void save(IncidentMetadataDto entity) {
         saveAll(Collections.singletonList(entity));
     }
 
-    public List<IncidentMetadataDto> findByFirstTimeToActivateLessThan(long startTime, int interval) {
-        Set<Object> eventIds = redisTemplate.opsForZSet().rangeByScore(
+    public void removeAll(List<IncidentMetadataDto> entities) {
+        List<Long> keys = entities.stream()
+                .map(IncidentMetadataDto::id)
+                .toList();
+
+        redisTemplate.opsForZSet().remove(
+                TIME_SORTED_SET,
+                keys.toArray());
+
+        redisTemplate.delete(keys.stream().map(it -> KEY_PREFIX + it).toList());
+    }
+
+    public Iterator<List<IncidentMetadataDto>> getIteratorByFirstTimeToActivateLessThan(
+            long startTime,
+            long endTime,
+            int batchSize) {
+        return new RedisBatchIterator<>(
+                startTime,
+                endTime,
+                batchSize,
+                this::fetchBatchFromRedis,
+                this::getEntitiesByIds
+        );
+    }
+
+    private Set<Long> fetchBatchFromRedis(long startTime, long endTime, long offset, int batchSize) {
+        Set<Object> rawResults = redisTemplate.opsForZSet().rangeByScore(
                 TIME_SORTED_SET,
                 startTime,
-                startTime + interval);
+                endTime,
+                offset,
+                batchSize);
 
-        if (eventIds.isEmpty()) {
-            return List.of();
+        if (rawResults.isEmpty()) {
+            return Collections.emptySet();
         }
 
-        List<Long> ids = eventIds.stream()
+        return rawResults.stream()
                 .map(it -> (String) it)
                 .map(Long::parseLong)
-                .collect(Collectors.toList());
-
-        return getEntitiesByIds(ids);
+                .collect(Collectors.toSet());
     }
 
     public Optional<IncidentMetadataDto> findById(Long id) {
@@ -91,5 +117,15 @@ public class RedisItemRepository {
                 .filter(Objects::nonNull)
                 .map(v -> (IncidentMetadataDto) v)
                 .collect(Collectors.toList());
+    }
+
+    public void addToDeduplicationSet(Long id, long ttlSeconds) {
+        String key = DEDUP_SET + id;
+        redisTemplate.opsForValue().setIfAbsent(key, "", Duration.ofSeconds(ttlSeconds));
+    }
+
+    public boolean isInDeduplicationSet(Long id) {
+        String key = DEDUP_SET + id;
+        return redisTemplate.hasKey(key);
     }
 }
