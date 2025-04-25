@@ -41,7 +41,6 @@ public class FastScheduler extends AbstractScheduler {
         this.fastSchedulersMetrics = fastSchedulersMetrics;
     }
 
-
     @Scheduled(fixedDelayString = "${app.scheduler.fast-database-scan.fixed-delay}")
     @Transactional
     public void ohohohoh() {

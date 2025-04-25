@@ -9,7 +9,14 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.scheduling.annotation.EnableScheduling;
 import ru.hse.mmstr_project.se.service.storage.ClientStorage;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateClientDto;
+import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
+import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
+import ru.hse.mmstr_project.se.storage.common.mapper.ClientMapper;
+import ru.hse.mmstr_project.se.storage.common.repository.ScenarioRepository;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootApplication
@@ -23,6 +30,39 @@ public class EmergencyNotificationApplication {
 
         try {
             run.getBean(ClientStorage.class).save(new CreateClientDto("1", 11L, List.of()));
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
+
+
+        ClientMapper clientMapper = run.getBean(ClientMapper.class);
+        for (int ahaha = 0; ; ahaha++) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                return;
+            }
+
+            if (ahaha % 10000 == 0) {
+                System.out.println("HELL Ahaha: " + ahaha);
+            }
+
+            List<Scenario> scenarioDtos = new ArrayList<>();
+
+            for (int i = 0; i < 11; i++) {
+                CreateScenarioDto createScenarioDto = new CreateScenarioDto(
+                        "aahahhahahah",
+                        1L,
+                        List.of(),
+                        Instant.now().plus(7 + 3 * i, ChronoUnit.SECONDS),
+                        List.of(Instant.now().plus(7 + 3 * i, ChronoUnit.SECONDS), Instant.now().plus(22 + 2 * i, ChronoUnit.SECONDS)),
+                        1,
+                        true,
+                        "heh"
+                );
+                scenarioDtos.add(clientMapper.toEntity(createScenarioDto));
+            }
+
+            run.getBean(ScenarioRepository.class).saveAll(scenarioDtos);
+        }
     }
 }
