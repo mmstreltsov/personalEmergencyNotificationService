@@ -19,7 +19,7 @@ import java.util.concurrent.Executor;
 @Component
 public class FastScheduler extends AbstractScheduler {
 
-    private static final long SCHEDULER_ID = 1;
+    private static final long SCHEDULER_ID = 2;
     private static final int BATCH_SIZE = 128;
     private static final long FROM = Instant.EPOCH.getEpochSecond();
 
