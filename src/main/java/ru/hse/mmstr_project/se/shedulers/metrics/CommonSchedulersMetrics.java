@@ -1,4 +1,4 @@
-package ru.hse.mmstr_project.se.shedulers;
+package ru.hse.mmstr_project.se.shedulers.metrics;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
@@ -27,7 +27,7 @@ public class CommonSchedulersMetrics {
         this.requestTimer = Timer.builder("scheduler.common.batch.processing.time")
                 .description("Batch processing time")
                 .tag("place", "schedulers")
-                .publishPercentileHistogram() // Это включает гистограмму в Prometheus
+                .publishPercentileHistogram()
                 .register(meterRegistry);
     }
 

@@ -4,8 +4,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 
-import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,7 @@ public class RedisItemRepository {
 
     private static final String KEY_PREFIX = "incident:";
     private static final String TIME_SORTED_SET = "incident:time-index";
-    private static final String DEDUP_SET = "dedup:";
+    private static final String DEDUP_SET = "dedup:set:";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -119,13 +120,41 @@ public class RedisItemRepository {
                 .collect(Collectors.toList());
     }
 
-    public void addToDeduplicationSet(Long id, long ttlSeconds) {
-        String key = DEDUP_SET + id;
-        redisTemplate.opsForValue().setIfAbsent(key, "", Duration.ofSeconds(ttlSeconds));
+    public void addToDeduplicationSet(Collection<Long> ids, long ttlSeconds) {
+        String setKey = DEDUP_SET + System.currentTimeMillis();
+        redisTemplate.opsForSet().add(setKey, ids.stream().map(Object::toString).toArray(String[]::new));
+        redisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);
     }
 
-    public boolean isInDeduplicationSet(Long id) {
-        String key = DEDUP_SET + id;
-        return redisTemplate.hasKey(key);
+    public List<Long> filterDuplicates(Collection<Long> ids) {
+        Set<String> setKeys = redisTemplate.keys("dedup:set:*");
+
+        if (setKeys.isEmpty()) {
+            return new ArrayList<>(ids);
+        }
+
+        List<String> idStrings = ids.stream()
+                .map(Object::toString)
+                .toList();
+
+        String tempSetKey = "temp:check:" + UUID.randomUUID();
+
+        try {
+            redisTemplate.opsForSet().add(tempSetKey, idStrings.toArray(new String[0]));
+
+            for (String setKey : setKeys) {
+                redisTemplate.opsForSet().difference(tempSetKey, setKey);
+            }
+
+            Set<String> remainingIdStrings = redisTemplate.opsForSet().members(tempSetKey).stream()
+                    .map(it -> (String) it)
+                    .collect(Collectors.toSet());
+
+            return remainingIdStrings.stream()
+                    .map(Long::parseLong)
+                    .collect(Collectors.toList());
+        } finally {
+            redisTemplate.delete(tempSetKey);
+        }
     }
 }

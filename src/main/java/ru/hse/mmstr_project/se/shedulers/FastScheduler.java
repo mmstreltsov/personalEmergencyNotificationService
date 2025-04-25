@@ -5,6 +5,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.service.FastSchedulerManager;
+import ru.hse.mmstr_project.se.shedulers.metrics.FastSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 import ru.hse.mmstr_project.se.storage.fast_storage.repository.RedisItemRepository;
@@ -25,15 +26,19 @@ public class FastScheduler extends AbstractScheduler {
     private final Executor taskExecutor;
     private final RedisItemRepository repository;
     private final FastSchedulerManager fastSchedulerManager;
+    private final FastSchedulersMetrics fastSchedulersMetrics;
 
     public FastScheduler(
             @Qualifier("taskExecutorForFastStorage") Executor taskExecutor,
             RedisItemRepository repository,
-            SchedulersStateRepository schedulersStateRepository, FastSchedulerManager fastSchedulerManager) {
+            SchedulersStateRepository schedulersStateRepository,
+            FastSchedulerManager fastSchedulerManager,
+            FastSchedulersMetrics fastSchedulersMetrics) {
         super(schedulersStateRepository);
         this.taskExecutor = taskExecutor;
         this.repository = repository;
         this.fastSchedulerManager = fastSchedulerManager;
+        this.fastSchedulersMetrics = fastSchedulersMetrics;
     }
 
 
@@ -50,6 +55,7 @@ public class FastScheduler extends AbstractScheduler {
         while (iterator.hasNext()) {
             List<IncidentMetadataDto> incidentMetadataDto = iterator.next();
             taskExecutor.execute(() -> fastSchedulerManager.handle(incidentMetadataDto));
+            fastSchedulersMetrics.inc(incidentMetadataDto.size());
         }
         saveLastProcessedTime(to);
     }
