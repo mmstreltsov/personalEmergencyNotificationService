@@ -37,7 +37,7 @@ public class EmergencyNotificationApplication {
         ClientMapper clientMapper = run.getBean(ClientMapper.class);
         for (int ahaha = 0; ; ahaha++) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(2_000);
             } catch (InterruptedException e) {
                 return;
             }
@@ -48,13 +48,13 @@ public class EmergencyNotificationApplication {
 
             List<Scenario> scenarioDtos = new ArrayList<>();
 
-            for (int i = 0; i < 11; i++) {
+            for (int i = 0; i < 10; i++) {
                 CreateScenarioDto createScenarioDto = new CreateScenarioDto(
                         "aahahhahahah",
                         1L,
                         List.of(),
-                        Instant.now().plus(7 + 3 * i, ChronoUnit.SECONDS),
-                        List.of(Instant.now().plus(7 + 3 * i, ChronoUnit.SECONDS), Instant.now().plus(22 + 2 * i, ChronoUnit.SECONDS)),
+                        Instant.now().plus(17 + 3 * i, ChronoUnit.SECONDS),
+                        List.of(Instant.now().plus(17 + 3 * i, ChronoUnit.SECONDS), Instant.now().plus(32 + 2 * i, ChronoUnit.SECONDS)),
                         1,
                         true,
                         "heh"

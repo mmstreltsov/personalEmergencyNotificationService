@@ -33,7 +33,8 @@ public class FastSchedulerManager {
     private void handleI(Collection<IncidentMetadataDto> incidentMetadataDtos) {
         incidentMetadataDtos = filterDuplicates(incidentMetadataDtos);
 
-        System.out.println("HANDLED " + incidentMetadataDtos.size());
+        // kafka
+
         repository.removeAll(incidentMetadataDtos.stream().limit(incidentMetadataDtos.size() / 2).toList());
     }
 

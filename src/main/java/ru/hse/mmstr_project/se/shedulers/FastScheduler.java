@@ -20,8 +20,9 @@ import java.util.concurrent.Executor;
 public class FastScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 2;
+    private static final int SECONDS_TO_EXTRA_SCAN = 5;
     private static final int BATCH_SIZE = 128;
-    private static final long FROM = Instant.EPOCH.getEpochSecond();
+    private static final long FROM = Instant.EPOCH.getEpochSecond() * 1000;
 
     private final Executor taskExecutor;
     private final RedisItemRepository repository;
@@ -44,17 +45,18 @@ public class FastScheduler extends AbstractScheduler {
     @Scheduled(fixedDelayString = "${app.scheduler.fast-database-scan.fixed-delay}")
     @Transactional
     public void ohohohoh() {
-        Instant to = Instant.now().plus(5, ChronoUnit.SECONDS);
+        Instant to = Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
 
         Iterator<List<IncidentMetadataDto>> iterator = repository.getIteratorByFirstTimeToActivateLessThan(
                 FROM,
-                to.getEpochSecond(),
+                to.getEpochSecond() * 1000,
                 BATCH_SIZE);
 
         while (iterator.hasNext()) {
             List<IncidentMetadataDto> incidentMetadataDto = iterator.next();
             taskExecutor.execute(() -> fastSchedulerManager.handle(incidentMetadataDto));
-            fastSchedulersMetrics.inc(incidentMetadataDto.size());
+            fastSchedulersMetrics.incProcessedItems(incidentMetadataDto.size());
+            fastSchedulersMetrics.incBatches();
         }
         saveLastProcessedTime(to);
     }

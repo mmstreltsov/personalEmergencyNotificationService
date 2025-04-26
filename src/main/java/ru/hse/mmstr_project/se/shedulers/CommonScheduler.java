@@ -22,7 +22,7 @@ public class CommonScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 1;
     private static final int SECONDS_TO_EXTRA_SCAN = 10;
-    private static final int BATCH_SIZE = 128;
+    private static final int BATCH_SIZE = 512;
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     private final Executor taskExecutor;
@@ -59,7 +59,8 @@ public class CommonScheduler extends AbstractScheduler {
                     .forEachRemaining(scenarios -> {
                         taskExecutor.execute(() -> manager.handle(scenarios));
                         updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
-                        metrics.inc(scenarios.size());
+                        metrics.incProcessedItems(scenarios.size());
+                        metrics.incBatches();
                     });
         }
         saveLastProcessedTime(to);

@@ -20,7 +20,7 @@ public record IncidentMetadataDto(
 
     public static IncidentMetadataDto parse(ScenarioDto scenarioDto, ClientDto clientDto) {
         return new IncidentMetadataDto(
-                clientDto.getChatId(),
+                scenarioDto.getId(),
                 scenarioDto.getText(),
                 scenarioDto.getFirstTimeToActivate().toEpochMilli(),
                 scenarioDto.getListTimesToActivate().stream().map(Instant::toEpochMilli).toList(),

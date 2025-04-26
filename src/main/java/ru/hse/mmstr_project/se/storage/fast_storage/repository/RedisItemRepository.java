@@ -24,6 +24,7 @@ public class RedisItemRepository {
     private static final String KEY_PREFIX = "incident:";
     private static final String TIME_SORTED_SET = "incident:time-index";
     private static final String DEDUP_SET = "dedup:set:";
+    private static final String TEMP_CHECK = "temp:check:";
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -94,8 +95,7 @@ public class RedisItemRepository {
         }
 
         return rawResults.stream()
-                .map(it -> (String) it)
-                .map(Long::parseLong)
+                .map(it -> Long.valueOf((Integer) it))
                 .collect(Collectors.toSet());
     }
 
@@ -127,7 +127,7 @@ public class RedisItemRepository {
     }
 
     public List<Long> filterDuplicates(Collection<Long> ids) {
-        Set<String> setKeys = redisTemplate.keys("dedup:set:*");
+        Set<String> setKeys = redisTemplate.keys(DEDUP_SET + "*");
 
         if (setKeys.isEmpty()) {
             return new ArrayList<>(ids);
@@ -137,7 +137,7 @@ public class RedisItemRepository {
                 .map(Object::toString)
                 .toList();
 
-        String tempSetKey = "temp:check:" + UUID.randomUUID();
+        String tempSetKey = TEMP_CHECK + UUID.randomUUID();
 
         try {
             redisTemplate.opsForSet().add(tempSetKey, idStrings.toArray(new String[0]));
