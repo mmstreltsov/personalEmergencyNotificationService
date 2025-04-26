@@ -7,9 +7,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.service.CommonSchedulerManager;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
-import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
+import ru.hse.mmstr_project.se.shedulers.metrics.CommonSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
-import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
 
 import java.time.Instant;
@@ -19,28 +18,27 @@ import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 @Component
-public class CommonScheduler {
+public class CommonScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 1;
     private static final int SECONDS_TO_EXTRA_SCAN = 10;
-    private static final int BATCH_SIZE = 128;
+    private static final int BATCH_SIZE = 512;
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     private final Executor taskExecutor;
     private final ScenarioStorage scenarioStorage;
-    private final SchedulersStateRepository schedulersStateRepository;
     private final CommonSchedulerManager manager;
     private final CommonSchedulersMetrics metrics;
 
     public CommonScheduler(
-            @Qualifier("taskExecutor") Executor taskExecutor,
+            @Qualifier("taskExecutorForCommonStorage") Executor taskExecutor,
             ScenarioStorage scenarioStorage,
             SchedulersStateRepository schedulersStateRepository,
             CommonSchedulerManager manager,
             CommonSchedulersMetrics metrics) {
+        super(schedulersStateRepository);
         this.taskExecutor = taskExecutor;
         this.scenarioStorage = scenarioStorage;
-        this.schedulersStateRepository = schedulersStateRepository;
         this.manager = manager;
         this.metrics = metrics;
     }
@@ -48,19 +46,6 @@ public class CommonScheduler {
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan.fixed-delay}")
     @Transactional
     public void ahahah() {
-        for (int i = 0; i < 7; i++) {
-            scenarioStorage.save(new CreateScenarioDto(
-                    "aahahhahahah",
-                    1L,
-                    List.of(),
-                    Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS),
-                    List.of(Instant.now().plus(7 + 11 * i, ChronoUnit.SECONDS), Instant.now().plus(22 + 10 * i, ChronoUnit.SECONDS)),
-                    -1,
-                    true,
-                    "heh"
-            ));
-        }
-
         Instant from = getLastProcessedTime();
         Instant to = Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
         metrics.setTimeWindowValueSec(to.getEpochSecond() - from.getEpochSecond());
@@ -69,12 +54,14 @@ public class CommonScheduler {
             return;
         }
 
+        metrics.flushBatches();
         try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
             Iterators.partition(stream.iterator(), BATCH_SIZE)
                     .forEachRemaining(scenarios -> {
                         taskExecutor.execute(() -> manager.handle(scenarios));
                         updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
-                        metrics.inc(scenarios.size());
+                        metrics.incProcessedItems(scenarios.size());
+                        metrics.incBatches();
                     });
         }
         saveLastProcessedTime(to);
@@ -95,15 +82,8 @@ public class CommonScheduler {
         scenarioStorage.saveAll(dtos);
     }
 
-    @Transactional
-    protected void saveLastProcessedTime(Instant time) {
-        schedulersStateRepository.save(new SchedulersState(SCHEDULER_ID, time));
-    }
-
-    @Transactional(readOnly = true)
-    protected Instant getLastProcessedTime() {
-        return schedulersStateRepository.findById(SCHEDULER_ID)
-                .map(SchedulersState::getFetchTime)
-                .orElse(Instant.now());
+    @Override
+    protected Long getSchedulerId() {
+        return SCHEDULER_ID;
     }
 }

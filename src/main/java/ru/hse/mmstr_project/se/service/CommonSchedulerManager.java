@@ -2,7 +2,7 @@ package ru.hse.mmstr_project.se.service;
 
 import org.springframework.stereotype.Service;
 import ru.hse.mmstr_project.se.service.storage.ClientStorage;
-import ru.hse.mmstr_project.se.shedulers.CommonSchedulersMetrics;
+import ru.hse.mmstr_project.se.shedulers.metrics.CommonSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
