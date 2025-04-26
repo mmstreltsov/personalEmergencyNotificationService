@@ -37,7 +37,7 @@ public class EmergencyNotificationApplication {
         ClientMapper clientMapper = run.getBean(ClientMapper.class);
         for (int ahaha = 0; ; ahaha++) {
             try {
-                Thread.sleep(2_000);
+                Thread.sleep(300);
             } catch (InterruptedException e) {
                 return;
             }

@@ -61,6 +61,9 @@ public class RedisItemRepository {
         List<Long> keys = entities.stream()
                 .map(IncidentMetadataDto::id)
                 .toList();
+        if (keys.isEmpty()) {
+            return;
+        }
 
         redisTemplate.opsForZSet().remove(
                 TIME_SORTED_SET,
@@ -121,6 +124,9 @@ public class RedisItemRepository {
     }
 
     public void addToDeduplicationSet(Collection<Long> ids, long ttlSeconds) {
+        if (ids.isEmpty()) {
+            return;
+        }
         String setKey = DEDUP_SET + System.currentTimeMillis();
         redisTemplate.opsForSet().add(setKey, ids.stream().map(Object::toString).toArray(String[]::new));
         redisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);

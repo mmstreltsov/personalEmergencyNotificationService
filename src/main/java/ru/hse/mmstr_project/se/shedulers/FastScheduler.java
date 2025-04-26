@@ -52,8 +52,13 @@ public class FastScheduler extends AbstractScheduler {
                 to.getEpochSecond() * 1000,
                 BATCH_SIZE);
 
+        fastSchedulersMetrics.flushBatches();
         while (iterator.hasNext()) {
             List<IncidentMetadataDto> incidentMetadataDto = iterator.next();
+            if (incidentMetadataDto.isEmpty()) {
+                continue;
+            }
+
             taskExecutor.execute(() -> fastSchedulerManager.handle(incidentMetadataDto));
             fastSchedulersMetrics.incProcessedItems(incidentMetadataDto.size());
             fastSchedulersMetrics.incBatches();

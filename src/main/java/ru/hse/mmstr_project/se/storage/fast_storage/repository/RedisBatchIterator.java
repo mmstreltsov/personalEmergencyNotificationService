@@ -16,8 +16,8 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
     private final EntityConverter<T> entityConverter;
 
     private long currentOffset = 0;
-    private boolean hasMoreData = true;
     private List<T> nextBatch = null;
+    private boolean noKeys = false;
 
     @FunctionalInterface
     public interface BatchFetcher {
@@ -48,12 +48,8 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
             return true;
         }
 
-        if (!hasMoreData) {
-            return false;
-        }
-
         loadNextBatch();
-        return nextBatch != null && !nextBatch.isEmpty();
+        return !noKeys;
     }
 
     @Override
@@ -71,17 +67,13 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
         Set<Long> keys = batchFetcher.fetch(startTime, endTime, currentOffset, batchSize);
 
         if (keys.isEmpty()) {
-            hasMoreData = false;
+            noKeys = true;
             nextBatch = Collections.emptyList();
             return;
         }
 
         nextBatch = entityConverter.apply(new ArrayList<>(keys));
         currentOffset += keys.size();
-
-        if (keys.size() < batchSize) {
-            hasMoreData = false;
-        }
     }
 
     @Override

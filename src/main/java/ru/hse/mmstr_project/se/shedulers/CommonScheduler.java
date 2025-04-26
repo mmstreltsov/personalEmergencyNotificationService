@@ -54,6 +54,7 @@ public class CommonScheduler extends AbstractScheduler {
             return;
         }
 
+        metrics.flushBatches();
         try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
             Iterators.partition(stream.iterator(), BATCH_SIZE)
                     .forEachRemaining(scenarios -> {
