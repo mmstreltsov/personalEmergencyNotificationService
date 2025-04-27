@@ -9,15 +9,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class BatchPaginationIterator<E, T> implements Iterator<List<T>> {
     private final Function<Pageable, Page<E>> pageSupplier;
     private final Function<E, T> dtoMapper;
     private final int batchSize;
+    private int currentPage = 0;
     private final AtomicBoolean cancelled;
 
-    private int currentPage = 0;
     private boolean hasMorePages = true;
 
     public BatchPaginationIterator(
@@ -47,10 +46,10 @@ public class BatchPaginationIterator<E, T> implements Iterator<List<T>> {
         }
 
         Page<E> page = pageSupplier.apply(PageRequest.of(currentPage++, batchSize));
-        hasMorePages = !page.isEmpty() && page.hasNext();
+        hasMorePages = page.getNumber() < page.getTotalPages();
 
         return page.getContent().stream()
                 .map(dtoMapper)
-                .collect(Collectors.toList());
+                .toList();
     }
 }

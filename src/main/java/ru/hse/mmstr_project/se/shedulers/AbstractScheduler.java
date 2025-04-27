@@ -1,7 +1,6 @@
 package ru.hse.mmstr_project.se.shedulers;
 
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.storage.common.entity.system.SchedulersState;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
 
@@ -17,17 +16,14 @@ public abstract class AbstractScheduler {
         this.schedulersStateRepository = schedulersStateRepository;
     }
 
-    @Transactional
     protected void saveLastProcessedTime(Instant time) {
         schedulersStateRepository.save(new SchedulersState(getSchedulerId(), time));
     }
 
-    @Transactional
     protected void markLastProcessedLikeUnsuccessfully() {
         schedulersStateRepository.setLastTryFailedById(getSchedulerId());
     }
 
-    @Transactional(readOnly = true)
     protected SchedulersStateDto getLastProcessedTime() {
         return schedulersStateRepository.findById(getSchedulerId())
                 .map(it -> new SchedulersStateDto(it.getFetchTime(), it.isSuccessLastTry()))
