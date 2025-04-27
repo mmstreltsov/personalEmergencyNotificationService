@@ -15,11 +15,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 @Component
 public class CommonScheduler extends AbstractScheduler {
@@ -67,24 +65,24 @@ public class CommonScheduler extends AbstractScheduler {
         }
         AtomicBoolean cancelled = new AtomicBoolean(false);
         metrics.flushBatches();
-        try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
-            Iterator<ScenarioDto> iterator = new CancellableIterator<>(stream.iterator(), cancelled);
-            Iterators.partition(iterator, BATCH_SIZE).forEachRemaining(scenarios -> {
-                if (cancelled.get()) {
-                    return;
-                }
 
-                try {
-                    taskExecutor.execute(() -> manager.handle(scenarios));
-                } catch (RejectedExecutionException e) {
-                    cancelled.set(true);
-                    return;
-                }
-                updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
-                metrics.incProcessedItems(scenarios.size());
-                metrics.incBatches();
-            });
-        }
+        Iterator<ScenarioDto> iterator = scenarioStorage.iterateScenariosInTimeRange(from, to, BATCH_SIZE, cancelled);
+        Iterators.partition(iterator, BATCH_SIZE).forEachRemaining(scenarios -> {
+            if (cancelled.get()) {
+                return;
+            }
+
+            try {
+                taskExecutor.execute(() -> manager.handle(scenarios));
+            } catch (RejectedExecutionException e) {
+                cancelled.set(true);
+                return;
+            }
+            updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
+            metrics.incProcessedItems(scenarios.size());
+            metrics.incBatches();
+        });
+
         if (cancelled.get()) {
             markLastProcessedLikeUnsuccessfully();
             return;
@@ -92,7 +90,6 @@ public class CommonScheduler extends AbstractScheduler {
         saveLastProcessedTime(to);
     }
 
-    @Transactional
     protected void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {
         List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
             Instant nextTime = scenarioDto
@@ -110,20 +107,5 @@ public class CommonScheduler extends AbstractScheduler {
     @Override
     protected Long getSchedulerId() {
         return SCHEDULER_ID;
-    }
-
-    private record CancellableIterator<T>(Iterator<T> delegate, AtomicBoolean cancelled) implements Iterator<T> {
-        @Override
-        public boolean hasNext() {
-            return !cancelled.get() && delegate.hasNext();
-        }
-
-        @Override
-        public T next() {
-            if (cancelled.get()) {
-                throw new NoSuchElementException("Iterator was cancelled");
-            }
-            return delegate.next();
-        }
     }
 }

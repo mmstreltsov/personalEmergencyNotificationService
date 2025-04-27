@@ -4,12 +4,15 @@ import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
+import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 import ru.hse.mmstr_project.se.storage.common.mapper.ClientMapper;
+import ru.hse.mmstr_project.se.storage.common.repository.PaginationIterator;
 import ru.hse.mmstr_project.se.storage.common.repository.ScenarioRepository;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.stream.Stream;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 public class ScenarioStorage {
@@ -32,8 +35,15 @@ public class ScenarioStorage {
         scenarioRepository.save(clientMapper.toEntity(scenarioDto));
     }
 
-    @Transactional
-    public Stream<ScenarioDto> streamScenariosInTimeRange(Instant startTime, Instant endTime) {
-        return scenarioRepository.streamScenariosInTimeRange(startTime, endTime).map(clientMapper::toDto);
+    public Iterator<ScenarioDto> iterateScenariosInTimeRange(
+            Instant from,
+            Instant to,
+            int batchSize,
+            AtomicBoolean cancelled) {
+        return new PaginationIterator<>(
+                pageable -> scenarioRepository.findScenariosInTimeRange(from, to, pageable),
+                a -> clientMapper.toDto((Scenario) a),
+                batchSize,
+                cancelled);
     }
 }
