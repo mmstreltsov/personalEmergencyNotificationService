@@ -2,6 +2,7 @@ package ru.hse.mmstr_project.se.shedulers;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.service.FastSchedulerManager;
@@ -14,6 +15,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 
@@ -53,6 +55,7 @@ public class FastScheduler extends AbstractScheduler {
                 to.getEpochSecond() * 1000,
                 BATCH_SIZE);
 
+        clearExecutorQueue(taskExecutor);
         fastSchedulersMetrics.flushBatches();
         while (iterator.hasNext()) {
             List<IncidentMetadataDto> incidentMetadataDto = iterator.next();
@@ -69,6 +72,12 @@ public class FastScheduler extends AbstractScheduler {
             fastSchedulersMetrics.incBatches();
         }
         saveLastProcessedTime(to);
+    }
+
+    private void clearExecutorQueue(Executor executor) {
+        ThreadPoolTaskExecutor exec = (ThreadPoolTaskExecutor) executor;
+        BlockingQueue<Runnable> queue = exec.getThreadPoolExecutor().getQueue();
+        queue.clear();
     }
 
     @Override
