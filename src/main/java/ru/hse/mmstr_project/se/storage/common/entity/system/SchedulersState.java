@@ -17,12 +17,20 @@ public class SchedulersState {
     @Column(name = "fetchTime")
     private Instant fetchTime;
 
+    @Column(name = "successLastTry")
+    private Boolean successLastTry;
+
     public SchedulersState() {
     }
 
     public SchedulersState(Long id, Instant fetchTime) {
+        this(id, fetchTime, Boolean.TRUE);
+    }
+
+    public SchedulersState(Long id, Instant fetchTime, Boolean successLastTry) {
         this.id = id;
         this.fetchTime = fetchTime;
+        this.successLastTry = successLastTry;
     }
 
     public Long getId() {
@@ -39,5 +47,9 @@ public class SchedulersState {
 
     public void setFetchTime(Instant fetchTime) {
         this.fetchTime = fetchTime;
+    }
+
+    public Boolean isSuccessLastTry() {
+        return successLastTry;
     }
 }

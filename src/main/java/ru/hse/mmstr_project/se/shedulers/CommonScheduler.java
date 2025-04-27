@@ -13,9 +13,12 @@ import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateR
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 @Component
@@ -47,27 +50,44 @@ public class CommonScheduler extends AbstractScheduler {
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan.fixed-delay}")
     @Transactional
     public void ahahah() {
-        Instant from = getLastProcessedTime();
-        Instant to = Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
+        SchedulersStateDto stateDto = getLastProcessedTime();
+
+        Instant from = stateDto.fetchTime();
+        Instant to = stateDto.lastTrySuccess()
+                ? Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS)
+                : stateDto.fetchTime().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
         metrics.setTimeWindowValueSec(to.getEpochSecond() - from.getEpochSecond());
 
-        if (!from.isBefore(to)) {
+        if (from.isAfter(to)) {
             return;
         }
 
+        if (!stateDto.lastTrySuccess()) {
+            clearExecutorQueue(taskExecutor);
+        }
+        AtomicBoolean cancelled = new AtomicBoolean(false);
         metrics.flushBatches();
         try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
-            Iterators.partition(stream.iterator(), BATCH_SIZE)
-                    .forEachRemaining(scenarios -> {
-                        try {
-                            taskExecutor.execute(() -> manager.handle(scenarios));
-                        } catch (RejectedExecutionException e) {
-                            return;
-                        }
-                        updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
-                        metrics.incProcessedItems(scenarios.size());
-                        metrics.incBatches();
-                    });
+            Iterator<ScenarioDto> iterator = new CancellableIterator<>(stream.iterator(), cancelled);
+            Iterators.partition(iterator, BATCH_SIZE).forEachRemaining(scenarios -> {
+                if (cancelled.get()) {
+                    return;
+                }
+
+                try {
+                    taskExecutor.execute(() -> manager.handle(scenarios));
+                } catch (RejectedExecutionException e) {
+                    cancelled.set(true);
+                    return;
+                }
+                updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
+                metrics.incProcessedItems(scenarios.size());
+                metrics.incBatches();
+            });
+        }
+        if (cancelled.get()) {
+            markLastProcessedLikeUnsuccessfully();
+            return;
         }
         saveLastProcessedTime(to);
     }
@@ -90,5 +110,20 @@ public class CommonScheduler extends AbstractScheduler {
     @Override
     protected Long getSchedulerId() {
         return SCHEDULER_ID;
+    }
+
+    private record CancellableIterator<T>(Iterator<T> delegate, AtomicBoolean cancelled) implements Iterator<T> {
+        @Override
+        public boolean hasNext() {
+            return !cancelled.get() && delegate.hasNext();
+        }
+
+        @Override
+        public T next() {
+            if (cancelled.get()) {
+                throw new NoSuchElementException("Iterator was cancelled");
+            }
+            return delegate.next();
+        }
     }
 }
