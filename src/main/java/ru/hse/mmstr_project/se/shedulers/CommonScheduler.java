@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.stream.Stream;
 
 @Component
@@ -22,7 +23,7 @@ public class CommonScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 1;
     private static final int SECONDS_TO_EXTRA_SCAN = 10;
-    private static final int BATCH_SIZE = 512;
+    private static final int BATCH_SIZE = 256;
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     private final Executor taskExecutor;
@@ -58,7 +59,11 @@ public class CommonScheduler extends AbstractScheduler {
         try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
             Iterators.partition(stream.iterator(), BATCH_SIZE)
                     .forEachRemaining(scenarios -> {
-                        taskExecutor.execute(() -> manager.handle(scenarios));
+                        try {
+                            taskExecutor.execute(() -> manager.handle(scenarios));
+                        } catch (RejectedExecutionException e) {
+                            return;
+                        }
                         updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
                         metrics.incProcessedItems(scenarios.size());
                         metrics.incBatches();
