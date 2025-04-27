@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 @Repository
 public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
 
-    @Query("SELECT s FROM Scenario s WHERE s.firstTimeToActivate >= :startTime AND s.firstTimeToActivate < :endTime")
+    @Query("SELECT s FROM Scenario s WHERE s.firstTimeToActivate >= :startTime AND s.firstTimeToActivate < :endTime order by s.firstTimeToActivate asc")
     Stream<Scenario> streamScenariosInTimeRange(
             @Param("startTime") Instant startTime,
             @Param("endTime") Instant endTime);
