@@ -1,6 +1,5 @@
 package ru.hse.mmstr_project.se.shedulers;
 
-import com.google.common.collect.Iterators;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -66,22 +65,20 @@ public class CommonScheduler extends AbstractScheduler {
         AtomicBoolean cancelled = new AtomicBoolean(false);
         metrics.flushBatches();
 
-        Iterator<ScenarioDto> iterator = scenarioStorage.iterateScenariosInTimeRange(from, to, BATCH_SIZE, cancelled);
-        Iterators.partition(iterator, BATCH_SIZE).forEachRemaining(scenarios -> {
-            if (cancelled.get()) {
-                return;
-            }
+        Iterator<List<ScenarioDto>> batchIterator =
+                scenarioStorage.iterateScenariosInBatches(from, to, BATCH_SIZE, cancelled);
+        while (batchIterator.hasNext()) {
+            List<ScenarioDto> scenarios = batchIterator.next();
 
             try {
                 taskExecutor.execute(() -> manager.handle(scenarios));
+                updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
+                metrics.incProcessedItems(scenarios.size());
+                metrics.incBatches();
             } catch (RejectedExecutionException e) {
                 cancelled.set(true);
-                return;
             }
-            updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
-            metrics.incProcessedItems(scenarios.size());
-            metrics.incBatches();
-        });
+        }
 
         if (cancelled.get()) {
             markLastProcessedLikeUnsuccessfully();
@@ -90,6 +87,7 @@ public class CommonScheduler extends AbstractScheduler {
         saveLastProcessedTime(to);
     }
 
+    @Transactional
     protected void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {
         List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
             Instant nextTime = scenarioDto
