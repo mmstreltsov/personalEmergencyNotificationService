@@ -6,6 +6,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import ru.hse.mmstr_project.se.shedulers.metrics.ExecutorMetrics;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 @Configuration
 public class SchedulersContext {
@@ -15,6 +16,8 @@ public class SchedulersContext {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(512);
 
         executor.setThreadNamePrefix("common-data-processor-");
 
@@ -26,6 +29,10 @@ public class SchedulersContext {
                 throw e;
             }
         });
+        executor.setRejectedExecutionHandler((task, exec) -> {
+            metrics.incCommonExecutorReject();
+            throw new RejectedExecutionException("Task " + task.toString() + " rejected from " + exec);
+        });
 
         executor.initialize();
         return executor;
@@ -36,9 +43,11 @@ public class SchedulersContext {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 
         executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(512);
 
         executor.setThreadNamePrefix("fast-data-processor-");
-        executor.setThreadPriority(Thread.MAX_PRIORITY - 1);
+        executor.setThreadPriority(Thread.NORM_PRIORITY + 1);
 
         executor.setTaskDecorator(task -> () -> {
             try {
@@ -47,6 +56,10 @@ public class SchedulersContext {
                 metrics.incFastExecutorError();
                 throw e;
             }
+        });
+        executor.setRejectedExecutionHandler((task, exec) -> {
+            metrics.incFastExecutorReject();
+            throw new RejectedExecutionException("Task " + task.toString() + " rejected from " + exec);
         });
 
         executor.initialize();

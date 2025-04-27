@@ -15,6 +15,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionException;
 
 @Component
 public class FastScheduler extends AbstractScheduler {
@@ -59,7 +60,11 @@ public class FastScheduler extends AbstractScheduler {
                 continue;
             }
 
-            taskExecutor.execute(() -> fastSchedulerManager.handle(incidentMetadataDto));
+            try {
+                taskExecutor.execute(() -> fastSchedulerManager.handle(incidentMetadataDto));
+            } catch (RejectedExecutionException ignored) {
+                return;
+            }
             fastSchedulersMetrics.incProcessedItems(incidentMetadataDto.size());
             fastSchedulersMetrics.incBatches();
         }
