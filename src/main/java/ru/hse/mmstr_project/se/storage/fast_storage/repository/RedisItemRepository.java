@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -35,7 +34,7 @@ public class RedisItemRepository {
     public void saveAll(List<IncidentMetadataDto> entities) {
         Map<String, IncidentMetadataDto> entityMap = new HashMap<>();
         for (IncidentMetadataDto entity : entities) {
-            String id = entity.id().toString();
+            String id = entity.id();
             entityMap.put(KEY_PREFIX + id, entity);
         }
 
@@ -58,7 +57,7 @@ public class RedisItemRepository {
     }
 
     public void removeAll(List<IncidentMetadataDto> entities) {
-        List<Long> keys = entities.stream()
+        List<String> keys = entities.stream()
                 .map(IncidentMetadataDto::id)
                 .toList();
         if (keys.isEmpty()) {
@@ -85,7 +84,7 @@ public class RedisItemRepository {
         );
     }
 
-    private Set<Long> fetchBatchFromRedis(long startTime, long endTime, long offset, int batchSize) {
+    private Set<String> fetchBatchFromRedis(long startTime, long endTime, long offset, int batchSize) {
         Set<Object> rawResults = redisTemplate.opsForZSet().rangeByScore(
                 TIME_SORTED_SET,
                 startTime,
@@ -98,15 +97,11 @@ public class RedisItemRepository {
         }
 
         return rawResults.stream()
-                .map(it -> Long.valueOf((Integer) it))
+                .map(it -> (String) it)
                 .collect(Collectors.toSet());
     }
 
-    public Optional<IncidentMetadataDto> findById(Long id) {
-        return Optional.ofNullable((IncidentMetadataDto) redisTemplate.opsForValue().get(KEY_PREFIX + id));
-    }
-
-    private List<IncidentMetadataDto> getEntitiesByIds(List<Long> ids) {
+    public List<IncidentMetadataDto> getEntitiesByIds(List<String> ids) {
         if (ids.isEmpty()) {
             return new ArrayList<>();
         }
@@ -123,7 +118,7 @@ public class RedisItemRepository {
                 .collect(Collectors.toList());
     }
 
-    public void addToDeduplicationSet(Collection<Long> ids, long ttlSeconds) {
+    public void addToDeduplicationSet(Collection<String> ids, long ttlSeconds) {
         if (ids.isEmpty()) {
             return;
         }
@@ -132,7 +127,7 @@ public class RedisItemRepository {
         redisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);
     }
 
-    public List<Long> filterDuplicates(Collection<Long> ids) {
+    public List<String> filterDuplicates(Collection<String> ids) {
         Set<String> setKeys = redisTemplate.keys(DEDUP_SET + "*");
 
         if (setKeys.isEmpty()) {
@@ -156,9 +151,7 @@ public class RedisItemRepository {
                     .map(it -> (String) it)
                     .collect(Collectors.toSet());
 
-            return remainingIdStrings.stream()
-                    .map(Long::parseLong)
-                    .collect(Collectors.toList());
+            return remainingIdStrings.stream().toList();
         } finally {
             redisTemplate.delete(tempSetKey);
         }

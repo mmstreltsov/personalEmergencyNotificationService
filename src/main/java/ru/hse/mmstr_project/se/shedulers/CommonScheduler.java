@@ -23,7 +23,9 @@ public class CommonScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 1;
     private static final int SECONDS_TO_EXTRA_SCAN = 10;
+    private static final int WAIT_IF_NEEDED_MS = 10_000;
     private static final int BATCH_SIZE = 256;
+    private static final int BATCH_SIZE_FOR_CHECKER = 1024;
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     private final Executor taskExecutor;
@@ -49,19 +51,22 @@ public class CommonScheduler extends AbstractScheduler {
     public void ahahah() {
         SchedulersStateDto stateDto = getLastProcessedTime();
 
+        if (!stateDto.lastTrySuccess()) {
+            try {
+                Thread.sleep(WAIT_IF_NEEDED_MS);
+            } catch (InterruptedException ignored) {
+                return;
+            }
+        }
+
         Instant from = stateDto.fetchTime();
-        Instant to = stateDto.lastTrySuccess()
-                ? Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS)
-                : stateDto.fetchTime().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
+        Instant to = Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
         metrics.setTimeWindowValueSec(to.getEpochSecond() - from.getEpochSecond());
 
         if (from.isAfter(to)) {
             return;
         }
 
-        if (!stateDto.lastTrySuccess()) {
-            clearExecutorQueue(taskExecutor);
-        }
         AtomicBoolean cancelled = new AtomicBoolean(false);
         metrics.flushBatches();
 
@@ -72,34 +77,35 @@ public class CommonScheduler extends AbstractScheduler {
 
             try {
                 taskExecutor.execute(() -> manager.handle(scenarios));
-                updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
                 metrics.incProcessedItems(scenarios.size());
                 metrics.incBatches();
             } catch (RejectedExecutionException e) {
                 cancelled.set(true);
+                to = scenarios.stream()
+                        .map(ScenarioDto::getFirstTimeToActivate)
+                        .reduce(to, (a, b) -> a.isBefore(b) ? a : b);
+                break;
             }
         }
 
-        if (cancelled.get()) {
-            markLastProcessedLikeUnsuccessfully();
-            return;
-        }
-        saveLastProcessedTime(to);
+        saveLastProcessedTime(to, !cancelled.get());
     }
 
+    @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan-checker.fixed-delay}")
     @Transactional
-    protected void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {
-        List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
-            Instant nextTime = scenarioDto
-                    .getListTimesToActivate()
-                    .stream()
-                    .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))
-                    .reduce(NEVER, (a, b) -> a.isBefore(b) ? a : b);
-            return scenarioDto.toBuilder()
-                    .firstTimeToActivate(nextTime.isAfter(minimalValue) ? nextTime : minimalValue)
-                    .build();
-        }).toList();
-        scenarioStorage.saveAll(dtos);
+    public void checker() {
+        SchedulersStateDto stateDto = getLastProcessedTime();
+
+        Instant from = stateDto.fetchTime().minus(100, ChronoUnit.SECONDS);
+        Instant to = stateDto.fetchTime().minus(20, ChronoUnit.SECONDS);
+
+        Iterator<List<ScenarioDto>> batchIterator =
+                scenarioStorage.iterateScenariosInBatches(from, to, BATCH_SIZE, new AtomicBoolean(false));
+
+        while (batchIterator.hasNext()) {
+            List<ScenarioDto> scenarios = batchIterator.next();
+            manager.handleLostPart(scenarios);
+        }
     }
 
     @Override

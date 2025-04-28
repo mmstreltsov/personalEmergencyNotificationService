@@ -3,14 +3,14 @@ package ru.hse.mmstr_project.se.storage.fast_storage.dto;
 import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
-import java.time.Instant;
 import java.util.List;
 
 public record IncidentMetadataDto(
-        Long id,
+        String id,
+        String name,
         String text,
         Long firstTimeToActivate,
-        List<Long> listTimesToActivate,
+        Long firstTimeToActivateOrigin,
         Integer allowedDelayAfterPing,
         String textToPing,
         String telegramId,
@@ -20,10 +20,11 @@ public record IncidentMetadataDto(
 
     public static IncidentMetadataDto parse(ScenarioDto scenarioDto, ClientDto clientDto) {
         return new IncidentMetadataDto(
-                scenarioDto.getId(),
+                scenarioDto.getUuid().toString(),
+                scenarioDto.getName(),
                 scenarioDto.getText(),
                 scenarioDto.getFirstTimeToActivate().toEpochMilli(),
-                scenarioDto.getListTimesToActivate().stream().map(Instant::toEpochMilli).toList(),
+                scenarioDto.getFirstTimeToActivateOrigin().toEpochMilli(),
                 scenarioDto.getAllowedDelayAfterPing(),
                 scenarioDto.getTextToPing(),
                 clientDto.getTelegramId(),

@@ -21,12 +21,12 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
 
     @FunctionalInterface
     public interface BatchFetcher {
-        Set<Long> fetch(long startTime, long endTime, long offset, int batchSize);
+        Set<String> fetch(long startTime, long endTime, long offset, int batchSize);
     }
 
     @FunctionalInterface
     public interface EntityConverter<T> {
-        List<T> apply(List<Long> entities);
+        List<T> apply(List<String> entities);
     }
 
     public RedisBatchIterator(
@@ -64,7 +64,7 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
     }
 
     private void loadNextBatch() {
-        Set<Long> keys = batchFetcher.fetch(startTime, endTime, currentOffset, batchSize);
+        Set<String> keys = batchFetcher.fetch(startTime, endTime, currentOffset, batchSize);
 
         if (keys.isEmpty()) {
             noKeys = true;

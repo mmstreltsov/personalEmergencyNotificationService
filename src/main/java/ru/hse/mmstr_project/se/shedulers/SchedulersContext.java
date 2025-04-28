@@ -17,7 +17,8 @@ public class SchedulersContext {
 
         executor.setCorePoolSize(5);
         executor.setMaxPoolSize(10);
-        executor.setQueueCapacity(512);
+        executor.setQueueCapacity(1024);
+        executor.setThreadPriority(Thread.NORM_PRIORITY + 2);
 
         executor.setThreadNamePrefix("common-data-processor-");
 

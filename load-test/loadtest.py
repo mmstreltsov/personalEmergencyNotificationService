@@ -1,4 +1,5 @@
 import psycopg2
+import uuid
 from psycopg2 import pool
 import time
 from datetime import datetime, timedelta, timezone
@@ -47,18 +48,21 @@ def save_scenarios_batch(conn, scenarios):
 
         for scenario in scenarios:
             cursor.execute("""
-            INSERT INTO scenario
-            (text, clientId, friendIds, firstTimeToActivate, listTimesToActivate,
-            allowedDelayAfterPing, okFromAntispam, textToPing)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO Scenario
+            (uuid, name, text, clientId, friendIds, firstTimeToActivate, firstTimeToActivateOrigin,
+            allowedDelayAfterPing, okFromAntispam, okByHand, textToPing)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
+                str(scenario["uuid"]),
+                scenario["name"],
                 scenario["text"],
                 scenario["client_id"],
                 scenario["friend_ids"],
                 scenario["first_time_to_activate"],
-                scenario["list_times_to_activate"],
+                scenario["first_time_to_activate_origin"],
                 scenario["allowed_delay_after_ping"],
                 scenario["ok_from_antispam"],
+                scenario["ok_by_hand"],
                 scenario["text_to_ping"]
             ))
 
@@ -92,18 +96,35 @@ def load_test(delay_ms):
             for i in range(10):
                 first_time = now + timedelta(seconds=17 + 3 * i)
                 second_time = now + timedelta(seconds=32 + 2 * i)
-
+                u = uuid.uuid4()
                 scenario = {
-                    "text": "aahahhahahah",
+                    "uuid": u,
+                    "name": f"Scenario {i+1}",
+                    "text": f"This is scenario number {i+1}",
                     "client_id": 1,
                     "friend_ids": [],
                     "first_time_to_activate": first_time,
-                    "list_times_to_activate": [first_time, second_time],
-                    "allowed_delay_after_ping": 1,
+                    "first_time_to_activate_origin": first_time,
+                    "allowed_delay_after_ping": 60,
                     "ok_from_antispam": True,
-                    "text_to_ping": "heh"
+                    "ok_by_hand": True,
+                    "text_to_ping": f"Ping text for scenario {i+1}"
+                }
+                scenario2 = {
+                    "uuid": u,
+                    "name": f"Scenario {i+1}",
+                    "text": f"This is scenario number {i+1}",
+                    "client_id": 1,
+                    "friend_ids": [],
+                    "first_time_to_activate": second_time,
+                    "first_time_to_activate_origin": second_time,
+                    "allowed_delay_after_ping": 60,
+                    "ok_from_antispam": True,
+                    "ok_by_hand": True,
+                    "text_to_ping": f"Ping text for scenario {i+1}"
                 }
                 scenarios.append(scenario)
+                scenarios.append(scenario2)
 
             save_scenarios_batch(conn, scenarios)
             count += 1
@@ -128,7 +149,7 @@ def multi_threaded_load_test(num_threads=1, delay_ms=300):
 
 if __name__ == "__main__":
     try:
-        multi_threaded_load_test(1, 15)
+        multi_threaded_load_test(1, 50)
     except KeyboardInterrupt:
         print("Test interrupted by user")
     finally:
