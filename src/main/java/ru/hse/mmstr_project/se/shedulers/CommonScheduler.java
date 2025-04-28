@@ -1,6 +1,5 @@
 package ru.hse.mmstr_project.se.shedulers;
 
-import com.google.common.collect.Iterators;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,11 +14,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 @Component
 public class CommonScheduler extends AbstractScheduler {
@@ -67,24 +64,22 @@ public class CommonScheduler extends AbstractScheduler {
         }
         AtomicBoolean cancelled = new AtomicBoolean(false);
         metrics.flushBatches();
-        try (Stream<ScenarioDto> stream = scenarioStorage.streamScenariosInTimeRange(from, to)) {
-            Iterator<ScenarioDto> iterator = new CancellableIterator<>(stream.iterator(), cancelled);
-            Iterators.partition(iterator, BATCH_SIZE).forEachRemaining(scenarios -> {
-                if (cancelled.get()) {
-                    return;
-                }
 
-                try {
-                    taskExecutor.execute(() -> manager.handle(scenarios));
-                } catch (RejectedExecutionException e) {
-                    cancelled.set(true);
-                    return;
-                }
+        Iterator<List<ScenarioDto>> batchIterator =
+                scenarioStorage.iterateScenariosInBatches(from, to, BATCH_SIZE, cancelled);
+        while (batchIterator.hasNext()) {
+            List<ScenarioDto> scenarios = batchIterator.next();
+
+            try {
+                taskExecutor.execute(() -> manager.handle(scenarios));
                 updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
                 metrics.incProcessedItems(scenarios.size());
                 metrics.incBatches();
-            });
+            } catch (RejectedExecutionException e) {
+                cancelled.set(true);
+            }
         }
+
         if (cancelled.get()) {
             markLastProcessedLikeUnsuccessfully();
             return;
@@ -110,20 +105,5 @@ public class CommonScheduler extends AbstractScheduler {
     @Override
     protected Long getSchedulerId() {
         return SCHEDULER_ID;
-    }
-
-    private record CancellableIterator<T>(Iterator<T> delegate, AtomicBoolean cancelled) implements Iterator<T> {
-        @Override
-        public boolean hasNext() {
-            return !cancelled.get() && delegate.hasNext();
-        }
-
-        @Override
-        public T next() {
-            if (cancelled.get()) {
-                throw new NoSuchElementException("Iterator was cancelled");
-            }
-            return delegate.next();
-        }
     }
 }
