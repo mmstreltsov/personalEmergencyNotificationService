@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hse.mmstr_project.se.service.CommonSchedulerAsyncBatchUpdateManager;
 import ru.hse.mmstr_project.se.service.CommonSchedulerManager;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.shedulers.metrics.CommonSchedulersMetrics;
@@ -18,7 +17,6 @@ import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Function;
 
 @Component
 public class CommonScheduler extends AbstractScheduler {
@@ -32,21 +30,18 @@ public class CommonScheduler extends AbstractScheduler {
     private final ScenarioStorage scenarioStorage;
     private final CommonSchedulerManager manager;
     private final CommonSchedulersMetrics metrics;
-    private final CommonSchedulerAsyncBatchUpdateManager asyncBatchUpdateManager;
 
     public CommonScheduler(
             @Qualifier("taskExecutorForCommonStorage") Executor taskExecutor,
             ScenarioStorage scenarioStorage,
             SchedulersStateRepository schedulersStateRepository,
             CommonSchedulerManager manager,
-            CommonSchedulersMetrics metrics,
-            CommonSchedulerAsyncBatchUpdateManager asyncBatchUpdateManager) {
+            CommonSchedulersMetrics metrics) {
         super(schedulersStateRepository);
         this.taskExecutor = taskExecutor;
         this.scenarioStorage = scenarioStorage;
         this.manager = manager;
         this.metrics = metrics;
-        this.asyncBatchUpdateManager = asyncBatchUpdateManager;
     }
 
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan.fixed-delay}")
@@ -77,8 +72,7 @@ public class CommonScheduler extends AbstractScheduler {
 
             try {
                 taskExecutor.execute(() -> manager.handle(scenarios));
-
-                updateObjectsToNextPing(scenarios, to.plus(2, ChronoUnit.MINUTES));
+                updateObjectsToNextPing(scenarios, to.plus(1, ChronoUnit.MILLIS));
                 metrics.incProcessedItems(scenarios.size());
                 metrics.incBatches();
             } catch (RejectedExecutionException e) {
@@ -93,31 +87,19 @@ public class CommonScheduler extends AbstractScheduler {
         saveLastProcessedTime(to);
     }
 
+    @Transactional
     protected void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {
-        if (scenarios.isEmpty()) {
-            return;
-        }
-
-        Function<ScenarioDto, ScenarioDto> updateFunction = scenarioDto -> {
+        List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
             Instant nextTime = scenarioDto
                     .getListTimesToActivate()
                     .stream()
                     .filter(it -> it.isAfter(scenarioDto.getFirstTimeToActivate()))
                     .reduce(NEVER, (a, b) -> a.isBefore(b) ? a : b);
-
             return scenarioDto.toBuilder()
                     .firstTimeToActivate(nextTime.isAfter(minimalValue) ? nextTime : minimalValue)
                     .build();
-        };
-
-        boolean accepted = asyncBatchUpdateManager.queueUpdates(scenarios, updateFunction);
-
-        if (!accepted) {
-            List<ScenarioDto> updatedScenarios = scenarios.stream()
-                    .map(updateFunction)
-                    .toList();
-            scenarioStorage.saveAll(updatedScenarios);
-        }
+        }).toList();
+        scenarioStorage.saveAll(dtos);
     }
 
     @Override

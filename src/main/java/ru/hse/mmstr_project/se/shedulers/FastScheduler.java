@@ -3,6 +3,7 @@ package ru.hse.mmstr_project.se.shedulers;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.service.FastSchedulerManager;
 import ru.hse.mmstr_project.se.shedulers.metrics.FastSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
@@ -43,6 +44,7 @@ public class FastScheduler extends AbstractScheduler {
     }
 
     @Scheduled(fixedDelayString = "${app.scheduler.fast-database-scan.fixed-delay}")
+    @Transactional
     public void ohohohoh() {
         Instant to = Instant.now().plus(SECONDS_TO_EXTRA_SCAN, ChronoUnit.SECONDS);
 

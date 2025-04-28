@@ -128,7 +128,7 @@ def multi_threaded_load_test(num_threads=1, delay_ms=300):
 
 if __name__ == "__main__":
     try:
-        multi_threaded_load_test(1, 100)
+        multi_threaded_load_test(1, 15)
     except KeyboardInterrupt:
         print("Test interrupted by user")
     finally:
