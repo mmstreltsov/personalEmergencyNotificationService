@@ -94,7 +94,7 @@ public class CommonSchedulerManager {
 
         updateObjectsToNextPing(
                 result.stream().map(collect::get).toList(),
-                Instant.now().plus(22, ChronoUnit.SECONDS));
+                Instant.now().plus(31, ChronoUnit.SECONDS));
     }
 
     private void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {

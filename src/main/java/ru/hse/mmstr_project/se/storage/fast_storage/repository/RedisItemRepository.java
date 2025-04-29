@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class RedisItemRepository {
             return;
         }
         String setKey = DEDUP_SET + System.currentTimeMillis();
-        redisTemplate.opsForSet().add(setKey, ids.stream().map(Object::toString).toArray(String[]::new));
+        redisTemplate.opsForSet().add(setKey, ids.toArray(new String[0]));
         redisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);
     }
 
@@ -134,22 +135,23 @@ public class RedisItemRepository {
             return new ArrayList<>(ids);
         }
 
-        List<String> idStrings = ids.stream()
-                .map(Object::toString)
-                .toList();
-
         String tempSetKey = TEMP_CHECK + UUID.randomUUID();
 
         try {
-            redisTemplate.opsForSet().add(tempSetKey, idStrings.toArray(new String[0]));
+            redisTemplate.opsForSet().add(tempSetKey, ids.toArray(new String[0]));
 
+            Set<String> blacklist = new HashSet<>();
             for (String setKey : setKeys) {
-                redisTemplate.opsForSet().difference(tempSetKey, setKey);
+                blacklist.addAll(redisTemplate.opsForSet().difference(tempSetKey, setKey)
+                        .stream()
+                        .map(it -> (String) it)
+                        .toList());
             }
 
             Set<String> remainingIdStrings = redisTemplate.opsForSet().members(tempSetKey).stream()
                     .map(it -> (String) it)
                     .collect(Collectors.toSet());
+            remainingIdStrings.removeAll(blacklist);
 
             return remainingIdStrings.stream().toList();
         } finally {
