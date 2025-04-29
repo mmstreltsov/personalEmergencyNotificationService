@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Service
 public class FastSchedulerManager {
 
-    private static final int DUPLICATES_ALIVE_SECONDS = 60;
+    public static final int DUPLICATES_ALIVE_SECONDS = 120;
 
     private final RedisItemRepository repository;
     private final FastSchedulersMetrics fastSchedulersMetrics;
@@ -34,15 +34,14 @@ public class FastSchedulerManager {
         incidentMetadataDtos = filterDuplicates(incidentMetadataDtos);
 
         // kafka
-
         repository.removeAll(incidentMetadataDtos.stream().limit(incidentMetadataDtos.size() / 2).toList());
     }
 
     private List<IncidentMetadataDto> filterDuplicates(Collection<IncidentMetadataDto> incidentMetadataDtos) {
-        Map<Long, IncidentMetadataDto> collect = incidentMetadataDtos.stream()
+        Map<String, IncidentMetadataDto> collect = incidentMetadataDtos.stream()
                 .collect(Collectors.toMap(IncidentMetadataDto::id, Function.identity(), (f, s) -> s));
 
-        List<Long> result = repository.filterDuplicates(collect.keySet())
+        List<String> result = repository.filterDuplicates(collect.keySet())
                 .stream()
                 .toList();
         setProcessedLikeDuplicates(result);
@@ -51,7 +50,7 @@ public class FastSchedulerManager {
         return result.stream().map(collect::get).toList();
     }
 
-    private void setProcessedLikeDuplicates(Collection<Long> incidentMetadataDtos) {
+    private void setProcessedLikeDuplicates(Collection<String> incidentMetadataDtos) {
         repository.addToDeduplicationSet(incidentMetadataDtos, DUPLICATES_ALIVE_SECONDS);
     }
 }

@@ -2,98 +2,87 @@ package ru.hse.mmstr_project.se.storage.common.dto;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
-public class CreateScenarioDto {
-
-    private String text;
-    private Long clientId;
-    private List<Long> friendIds;
-    private Instant firstTimeToActivate;
-    private List<Instant> listTimesToActivate;
-    private Integer allowedDelayAfterPing;
-    private Boolean okFromAntispam;
-    private String textToPing;
+public final class CreateScenarioDto {
+    private final UUID uuid;
+    private final String name;
+    private final String text;
+    private final Long clientId;
+    private final List<Long> friendsIds;
+    private final Instant firstTimeToActivate;
+    private final Instant firstTimeToActivateOrigin;
+    private final Integer allowedDelayAfterPing;
+    private final Boolean okFromAntispam;
+    private final Boolean okByHand;
+    private final String textToPing;
 
     public CreateScenarioDto(
+            UUID uuid,
+            String name,
             String text,
             Long clientId,
-            List<Long> friendIds,
+            List<Long> friendsIds,
             Instant firstTimeToActivate,
-            List<Instant> listTimesToActivate,
+            Instant firstTimeToActivateOrigin,
             Integer allowedDelayAfterPing,
             Boolean okFromAntispam,
+            Boolean okByHand,
             String textToPing) {
+        this.uuid = uuid;
+        this.name = name;
         this.text = text;
         this.clientId = clientId;
-        this.friendIds = friendIds;
+        this.friendsIds = friendsIds;
         this.firstTimeToActivate = firstTimeToActivate;
-        this.listTimesToActivate = listTimesToActivate;
+        this.firstTimeToActivateOrigin = firstTimeToActivateOrigin;
         this.allowedDelayAfterPing = allowedDelayAfterPing;
         this.okFromAntispam = okFromAntispam;
+        this.okByHand = okByHand;
         this.textToPing = textToPing;
+    }
+
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public Long getClientId() {
         return clientId;
     }
 
-    public void setClientId(Long clientId) {
-        this.clientId = clientId;
-    }
-
-    public List<Long> getFriendIds() {
-        return friendIds;
-    }
-
-    public void setFriendIds(List<Long> friendIds) {
-        this.friendIds = friendIds;
+    public List<Long> getFriendsIds() {
+        return friendsIds;
     }
 
     public Instant getFirstTimeToActivate() {
         return firstTimeToActivate;
     }
 
-    public void setFirstTimeToActivate(Instant firstTimeToActivate) {
-        this.firstTimeToActivate = firstTimeToActivate;
-    }
-
-    public List<Instant> getListTimesToActivate() {
-        return listTimesToActivate;
-    }
-
-    public void setListTimesToActivate(List<Instant> listTimesToActivate) {
-        this.listTimesToActivate = listTimesToActivate;
+    public Instant getFirstTimeToActivateOrigin() {
+        return firstTimeToActivateOrigin;
     }
 
     public Integer getAllowedDelayAfterPing() {
         return allowedDelayAfterPing;
     }
 
-    public void setAllowedDelayAfterPing(Integer allowedDelayAfterPing) {
-        this.allowedDelayAfterPing = allowedDelayAfterPing;
-    }
-
     public Boolean getOkFromAntispam() {
         return okFromAntispam;
     }
 
-    public void setOkFromAntispam(Boolean okFromAntispam) {
-        this.okFromAntispam = okFromAntispam;
+    public Boolean getOkByHand() {
+        return okByHand;
     }
 
     public String getTextToPing() {
         return textToPing;
-    }
-
-    public void setTextToPing(String textToPing) {
-        this.textToPing = textToPing;
     }
 }

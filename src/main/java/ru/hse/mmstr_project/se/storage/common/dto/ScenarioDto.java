@@ -2,17 +2,21 @@ package ru.hse.mmstr_project.se.storage.common.dto;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public class ScenarioDto {
 
     private Long id;
+    private UUID uuid;
+    private String name;
     private String text;
     private Long clientId;
     private List<Long> friendsIds;
     private Instant firstTimeToActivate;
-    private List<Instant> listTimesToActivate;
+    private Instant firstTimeToActivateOrigin;
     private Integer allowedDelayAfterPing;
     private Boolean okFromAntispam;
+    private Boolean okByHand;
     private String textToPing;
 
     public ScenarioDto() {
@@ -21,34 +25,43 @@ public class ScenarioDto {
     private ScenarioDto(Builder builder) {
         this(
                 builder.id,
+                builder.uuid,
+                builder.name,
                 builder.text,
                 builder.clientId,
                 builder.friendsIds,
                 builder.firstTimeToActivate,
-                builder.listTimesToActivate,
+                builder.firstTimeToActivateOrigin,
                 builder.allowedDelayAfterPing,
                 builder.okFromAntispam,
+                builder.okByHand,
                 builder.textToPing);
     }
 
     public ScenarioDto(
             Long id,
+            UUID uuid,
+            String name,
             String text,
             Long clientId,
             List<Long> friendsIds,
             Instant firstTimeToActivate,
-            List<Instant> listTimesToActivate,
+            Instant firstTimeToActivateOrigin,
             Integer allowedDelayAfterPing,
             Boolean okFromAntispam,
+            Boolean okByHand,
             String textToPing) {
         this.id = id;
+        this.uuid = uuid;
+        this.name = name;
         this.text = text;
         this.clientId = clientId;
         this.friendsIds = friendsIds;
         this.firstTimeToActivate = firstTimeToActivate;
-        this.listTimesToActivate = listTimesToActivate;
+        this.firstTimeToActivateOrigin = firstTimeToActivateOrigin;
         this.allowedDelayAfterPing = allowedDelayAfterPing;
         this.okFromAntispam = okFromAntispam;
+        this.okByHand = okByHand;
         this.textToPing = textToPing;
     }
 
@@ -56,84 +69,63 @@ public class ScenarioDto {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public UUID getUuid() {
+        return uuid;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getText() {
         return text;
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
     public Long getClientId() {
         return clientId;
-    }
-
-    public void setClientId(Long clientId) {
-        this.clientId = clientId;
     }
 
     public List<Long> getFriendsIds() {
         return friendsIds;
     }
 
-    public void setFriendsIds(List<Long> friendsIds) {
-        this.friendsIds = friendsIds;
-    }
-
     public Instant getFirstTimeToActivate() {
         return firstTimeToActivate;
     }
 
-    public void setFirstTimeToActivate(Instant firstTimeToActivate) {
-        this.firstTimeToActivate = firstTimeToActivate;
-    }
-
-    public List<Instant> getListTimesToActivate() {
-        return listTimesToActivate;
-    }
-
-    public void setListTimesToActivate(List<Instant> listTimesToActivate) {
-        this.listTimesToActivate = listTimesToActivate;
+    public Instant getFirstTimeToActivateOrigin() {
+        return firstTimeToActivateOrigin;
     }
 
     public Integer getAllowedDelayAfterPing() {
         return allowedDelayAfterPing;
     }
 
-    public void setAllowedDelayAfterPing(Integer allowedDelayAfterPing) {
-        this.allowedDelayAfterPing = allowedDelayAfterPing;
-    }
-
     public Boolean getOkFromAntispam() {
         return okFromAntispam;
     }
 
-    public void setOkFromAntispam(Boolean okFromAntispam) {
-        this.okFromAntispam = okFromAntispam;
+    public Boolean getOkByHand() {
+        return okByHand;
     }
 
     public String getTextToPing() {
         return textToPing;
     }
 
-    public void setTextToPing(String textToPing) {
-        this.textToPing = textToPing;
-    }
-
     public Builder toBuilder() {
         return new Builder()
                 .id(this.id)
+                .uuid(this.uuid)
+                .name(this.name)
                 .text(this.text)
                 .clientId(this.clientId)
                 .friendsIds(this.friendsIds)
                 .firstTimeToActivate(this.firstTimeToActivate)
-                .listTimesToActivate(this.listTimesToActivate)
+                .firstTimeToActivateOrigin(this.firstTimeToActivateOrigin)
                 .allowedDelayAfterPing(this.allowedDelayAfterPing)
                 .okFromAntispam(this.okFromAntispam)
+                .okByHand(this.okByHand)
                 .textToPing(this.textToPing);
     }
 
@@ -143,13 +135,16 @@ public class ScenarioDto {
 
     public static class Builder {
         private Long id;
+        private UUID uuid;
+        private String name;
         private String text;
         private Long clientId;
         private List<Long> friendsIds;
         private Instant firstTimeToActivate;
-        private List<Instant> listTimesToActivate;
+        private Instant firstTimeToActivateOrigin;
         private Integer allowedDelayAfterPing;
         private Boolean okFromAntispam;
+        private Boolean okByHand;
         private String textToPing;
 
         private Builder() {
@@ -157,6 +152,16 @@ public class ScenarioDto {
 
         public Builder id(Long id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder uuid(UUID id) {
+            this.uuid = id;
+            return this;
+        }
+
+        public Builder name(String text) {
+            this.name = text;
             return this;
         }
 
@@ -180,10 +185,11 @@ public class ScenarioDto {
             return this;
         }
 
-        public Builder listTimesToActivate(List<Instant> listTimesToActivate) {
-            this.listTimesToActivate = listTimesToActivate;
+        public Builder firstTimeToActivateOrigin(Instant firstTimeToActivate) {
+            this.firstTimeToActivateOrigin = firstTimeToActivate;
             return this;
         }
+
 
         public Builder allowedDelayAfterPing(Integer allowedDelayAfterPing) {
             this.allowedDelayAfterPing = allowedDelayAfterPing;
@@ -192,6 +198,11 @@ public class ScenarioDto {
 
         public Builder okFromAntispam(Boolean okFromAntispam) {
             this.okFromAntispam = okFromAntispam;
+            return this;
+        }
+
+        public Builder okByHand(Boolean okByHand) {
+            this.okByHand = okByHand;
             return this;
         }
 
@@ -205,18 +216,20 @@ public class ScenarioDto {
         }
     }
 
-
     @Override
     public String toString() {
         return "ScenarioDto{" +
                 "id=" + id +
+                ", uuid=" + uuid +
+                ", name='" + name + '\'' +
                 ", text='" + text + '\'' +
                 ", clientId=" + clientId +
                 ", friendsIds=" + friendsIds +
                 ", firstTimeToActivate=" + firstTimeToActivate +
-                ", listTimesToActivate=" + listTimesToActivate +
+                ", firstTimeToActivateOrigin=" + firstTimeToActivateOrigin +
                 ", allowedDelayAfterPing=" + allowedDelayAfterPing +
                 ", okFromAntispam=" + okFromAntispam +
+                ", okByHand=" + okByHand +
                 ", textToPing='" + textToPing + '\'' +
                 '}';
     }

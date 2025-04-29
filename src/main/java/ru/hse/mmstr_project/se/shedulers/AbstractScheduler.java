@@ -23,6 +23,11 @@ public abstract class AbstractScheduler {
     }
 
     @Transactional
+    protected void saveLastProcessedTime(Instant time, boolean isOk) {
+        schedulersStateRepository.save(new SchedulersState(getSchedulerId(), time, isOk));
+    }
+
+    @Transactional
     protected void markLastProcessedLikeUnsuccessfully() {
         schedulersStateRepository.setLastTryFailedById(getSchedulerId());
     }

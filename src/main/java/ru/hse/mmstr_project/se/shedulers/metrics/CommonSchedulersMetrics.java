@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class CommonSchedulersMetrics {
 
     private final Counter counter;
+    private final Counter counterLostItems;
     private final AtomicLong batchesCount = new AtomicLong(0L);
     private final AtomicLong timeWindowValueSec = new AtomicLong(0L);
     private final Timer requestTimer;
@@ -19,6 +20,10 @@ public class CommonSchedulersMetrics {
     public CommonSchedulersMetrics(MeterRegistry meterRegistry) {
         this.counter = Counter.builder("scheduler.common.processing.count")
                 .description("Total amount of processed items")
+                .tag("place", "schedulers")
+                .register(meterRegistry);
+        this.counterLostItems = Counter.builder("scheduler.common.lost.items.count")
+                .description("Total amount of lost items")
                 .tag("place", "schedulers")
                 .register(meterRegistry);
         Gauge.builder("scheduler.common.batches.count", batchesCount, AtomicLong::get)
@@ -39,6 +44,11 @@ public class CommonSchedulersMetrics {
     public void incProcessedItems(int v) {
         counter.increment(v);
     }
+
+    public void incLostItems(int v) {
+        counterLostItems.increment(v);
+    }
+
 
     public void flushBatches() {
         batchesCount.set(0L);

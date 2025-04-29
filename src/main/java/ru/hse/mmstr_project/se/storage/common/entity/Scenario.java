@@ -11,6 +11,7 @@ import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "Scenario")
@@ -19,6 +20,12 @@ public class Scenario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "uuid", nullable = false)
+    private UUID uuid;
+
+    @Column(name = "name", nullable = false, columnDefinition = "TEXT")
+    private String name;
 
     @Column(name = "text", nullable = false, columnDefinition = "TEXT")
     private String text;
@@ -33,15 +40,17 @@ public class Scenario {
     @Column(name = "firstTimeToActivate")
     private Instant firstTimeToActivate;
 
-    @JdbcTypeCode(SqlTypes.ARRAY)
-    @Column(name = "listTimesToActivate", columnDefinition = "TIMESTAMP[]")
-    private List<Instant> listTimesToActivate;
+    @Column(name = "firstTimeToActivateOrigin")
+    private Instant firstTimeToActivateOrigin;
 
     @Column(name = "allowedDelayAfterPing")
     private Integer allowedDelayAfterPing;
 
     @Column(name = "okFromAntispam")
     private Boolean okFromAntispam;
+
+    @Column(name = "okByHand")
+    private Boolean okByHand;
 
     @Column(name = "textToPing", columnDefinition = "TEXT")
     private String textToPing;
@@ -50,21 +59,29 @@ public class Scenario {
     }
 
     public Scenario(
+            Long id,
+            UUID uuid,
+            String name,
             String text,
             Long clientId,
             List<Long> friendsIds,
             Instant firstTimeToActivate,
-            List<Instant> listTimesToActivate,
+            Instant firstTimeToActivateOrigin,
             Integer allowedDelayAfterPing,
             Boolean okFromAntispam,
+            Boolean okByHand,
             String textToPing) {
+        this.id = id;
+        this.uuid = uuid;
+        this.name = name;
         this.text = text;
         this.clientId = clientId;
         this.friendsIds = friendsIds;
         this.firstTimeToActivate = firstTimeToActivate;
-        this.listTimesToActivate = listTimesToActivate;
+        this.firstTimeToActivateOrigin = firstTimeToActivateOrigin;
         this.allowedDelayAfterPing = allowedDelayAfterPing;
         this.okFromAntispam = okFromAntispam;
+        this.okByHand = okByHand;
         this.textToPing = textToPing;
     }
 
@@ -108,12 +125,36 @@ public class Scenario {
         this.firstTimeToActivate = firstTimeToActivate;
     }
 
-    public List<Instant> getListTimesToActivate() {
-        return listTimesToActivate;
+    public UUID getUuid() {
+        return uuid;
     }
 
-    public void setListTimesToActivate(List<Instant> listTimesToActivate) {
-        this.listTimesToActivate = listTimesToActivate;
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Instant getFirstTimeToActivateOrigin() {
+        return firstTimeToActivateOrigin;
+    }
+
+    public void setFirstTimeToActivateOrigin(Instant firstTimeToActivateOrigin) {
+        this.firstTimeToActivateOrigin = firstTimeToActivateOrigin;
+    }
+
+    public Boolean getOkByHand() {
+        return okByHand;
+    }
+
+    public void setOkByHand(Boolean okByHand) {
+        this.okByHand = okByHand;
     }
 
     public Integer getAllowedDelayAfterPing() {
