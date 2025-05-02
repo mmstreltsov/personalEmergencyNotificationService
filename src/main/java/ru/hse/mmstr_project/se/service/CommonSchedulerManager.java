@@ -1,5 +1,6 @@
 package ru.hse.mmstr_project.se.service;
 
+import com.google.common.collect.Iterators;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.service.storage.ClientStorage;
@@ -22,6 +23,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class CommonSchedulerManager {
+
+    private static final int BATCH_SIZE = 256;
 
     private final RedisItemRepository redisItemRepository;
     private final ClientStorage clientStorage;
@@ -62,7 +65,7 @@ public class CommonSchedulerManager {
                 .flatMap(Optional::stream)
                 .toList();
 
-        redisItemRepository.saveAll(data);
+        Iterators.partition(data.iterator(), BATCH_SIZE).forEachRemaining(redisItemRepository::saveAll);
 
         // add notify to main user
     }
