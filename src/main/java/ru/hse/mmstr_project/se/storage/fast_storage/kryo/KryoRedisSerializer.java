@@ -3,7 +3,6 @@ package ru.hse.mmstr_project.se.storage.fast_storage.kryo;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
-import com.esotericsoftware.kryo.serializers.FieldSerializer;
 import com.esotericsoftware.kryo.serializers.JavaSerializer;
 import com.esotericsoftware.kryo.util.DefaultInstantiatorStrategy;
 import de.javakaffee.kryoserializers.JdkProxySerializer;
@@ -31,12 +30,11 @@ public class KryoRedisSerializer implements RedisSerializer<Object> {
     private static final ThreadLocal<Kryo> kryoThreadLocal = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
 
-        kryo.setRegistrationRequired(true);
+        kryo.setRegistrationRequired(false);
         kryo.setInstantiatorStrategy(new DefaultInstantiatorStrategy(new StdInstantiatorStrategy()));
 
-
-        kryo.register(IncidentMetadataDto.class, new FieldSerializer<>(kryo, IncidentMetadataDto.class));
-        kryo.register(FriendMetaDto.class, new FieldSerializer<>(kryo, FriendMetaDto.class));
+        kryo.register(IncidentMetadataDto.class);
+        kryo.register(FriendMetaDto.class);
 
         kryo.register(ArrayList.class);
         kryo.register(LinkedList.class);

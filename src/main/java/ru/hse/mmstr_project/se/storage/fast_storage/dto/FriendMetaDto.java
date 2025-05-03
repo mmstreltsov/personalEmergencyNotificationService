@@ -5,16 +5,13 @@ import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 import java.util.List;
 
 public final class FriendMetaDto {
-    private Integer id;
-    private String name;
-    private List<String> wayToNotify;
-    private String phoneNumber;
-    private Integer telegramId;
-    private Integer chatId;
-    private String email;
-
-    public FriendMetaDto() {
-    }
+    private final Integer id;
+    private final String name;
+    private final List<String> wayToNotify;
+    private final String phoneNumber;
+    private final Integer telegramId;
+    private final Integer chatId;
+    private final String email;
 
     public FriendMetaDto(
             Integer id,

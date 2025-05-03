@@ -29,13 +29,9 @@ public class RedisItemRepository {
     private static final String TEMP_CHECK = "temp:check:";
 
     private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, String> stringRedisTemplate;
 
-    public RedisItemRepository(
-            RedisTemplate<String, Object> redisTemplate,
-            RedisTemplate<String, String> stringRedisTemplate) {
+    public RedisItemRepository(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
-        this.stringRedisTemplate = stringRedisTemplate;
     }
 
     public void saveAll(List<IncidentMetadataDto> entities) {
@@ -54,22 +50,15 @@ public class RedisItemRepository {
                         Map.Entry::getKey,
                         it -> it.getValue().firstTimeToActivate()));
 
-        stringRedisTemplate.executePipelined((new SessionCallback<>() {
-            @Override
-            @SuppressWarnings("unchecked")
-            public Object execute(RedisOperations operations) {
-                zsetEntries.forEach((member, score) -> {
-                    operations.opsForZSet().add(TIME_SORTED_SET, member, score);
-                });
-
-                return null;
-            }
-        }));
-
         redisTemplate.executePipelined(new SessionCallback<>() {
             @Override
             @SuppressWarnings("unchecked")
             public Object execute(RedisOperations operations) {
+
+                zsetEntries.forEach((member, score) -> {
+                    operations.opsForZSet().add(TIME_SORTED_SET, member, score);
+                });
+
                 operations.opsForValue().multiSet(entityMap);
                 entityMap.forEach((key, entity) -> {
                     operations.expire(key, entity.allowedDelayAfterPing() + 5, TimeUnit.MINUTES);
@@ -113,16 +102,19 @@ public class RedisItemRepository {
     }
 
     private Set<String> fetchBatchFromRedis(long startTime, long endTime, long offset, int batchSize) {
-        Set<String> rawResults = stringRedisTemplate.opsForZSet().rangeByScore(
+        Set<Object> rawResults = redisTemplate.opsForZSet().rangeByScore(
                 TIME_SORTED_SET,
                 startTime,
                 endTime,
                 offset,
                 batchSize);
-        System.out.println("FETCHED RESULTS: " + rawResults.size());
+
+        if (rawResults.isEmpty()) {
+            return Collections.emptySet();
+        }
 
         return rawResults.stream()
-                .filter(Objects::nonNull)
+                .map(it -> (String) it)
                 .collect(Collectors.toSet());
     }
 
@@ -136,7 +128,6 @@ public class RedisItemRepository {
                 .collect(Collectors.toList());
 
         List<Object> values = redisTemplate.opsForValue().multiGet(keys);
-        System.out.println("RESULTS: " + values.size());
 
         return values.stream()
                 .filter(Objects::nonNull)
@@ -149,12 +140,12 @@ public class RedisItemRepository {
             return;
         }
         String setKey = DEDUP_SET + System.currentTimeMillis();
-        stringRedisTemplate.opsForSet().add(setKey, ids.toArray(new String[0]));
-        stringRedisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);
+        redisTemplate.opsForSet().add(setKey, ids.toArray(new String[0]));
+        redisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);
     }
 
     public List<String> filterDuplicates(Collection<String> ids) {
-        Set<String> setKeys = stringRedisTemplate.keys(DEDUP_SET + "*");
+        Set<String> setKeys = redisTemplate.keys(DEDUP_SET + "*");
 
         if (setKeys.isEmpty()) {
             return new ArrayList<>(ids);
@@ -163,22 +154,24 @@ public class RedisItemRepository {
         String tempSetKey = TEMP_CHECK + UUID.randomUUID();
 
         try {
-            stringRedisTemplate.opsForSet().add(tempSetKey, ids.toArray(new String[0]));
+            redisTemplate.opsForSet().add(tempSetKey, ids.toArray(new String[0]));
 
             Set<String> blacklist = new HashSet<>();
             for (String setKey : setKeys) {
-                blacklist.addAll(stringRedisTemplate.opsForSet().difference(tempSetKey, setKey)
+                blacklist.addAll(redisTemplate.opsForSet().difference(tempSetKey, setKey)
                         .stream()
                         .map(it -> (String) it)
                         .toList());
             }
 
-            Set<String> remainingIdStrings = new HashSet<>(stringRedisTemplate.opsForSet().members(tempSetKey));
+            Set<String> remainingIdStrings = redisTemplate.opsForSet().members(tempSetKey).stream()
+                    .map(it -> (String) it)
+                    .collect(Collectors.toSet());
             remainingIdStrings.removeAll(blacklist);
 
             return remainingIdStrings.stream().toList();
         } finally {
-            stringRedisTemplate.delete(tempSetKey);
+            redisTemplate.delete(tempSetKey);
         }
     }
 }
