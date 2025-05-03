@@ -101,9 +101,15 @@ public class CommonSchedulerManager {
     }
 
     private void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {
-        List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> scenarioDto.toBuilder()
-                .firstTimeToActivate(minimalValue)
-                .build()).toList();
+        List<ScenarioDto> dtos = scenarios.stream().map(scenarioDto -> {
+            long delay = scenarioDto.getAllowedDelayAfterPing() -
+                    (minimalValue.getEpochSecond() - scenarioDto.getFirstTimeToActivateOrigin().getEpochSecond());
+
+            return scenarioDto.toBuilder()
+                    .firstTimeToActivate(minimalValue)
+                    .allowedDelayAfterPing(delay >= 0 ? (int) delay : 0)
+                    .build();
+        }).toList();
         if (dtos.isEmpty()) {
             return;
         }

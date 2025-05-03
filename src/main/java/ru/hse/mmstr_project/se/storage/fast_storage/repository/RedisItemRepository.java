@@ -97,13 +97,17 @@ public class RedisItemRepository {
 
         List<String> indexes = fetchCurrentIndexes();
 
-        Long deleted = redisTemplate.delete(keys.stream().map(it -> KEY_PREFIX + it).toList());
-        System.out.println("DELETED: " + deleted);
 
-        Object[] keysArray = keys.toArray(new Object[0]);
-        indexes.forEach(index -> {
-            Long remove = redisTemplate.opsForZSet().remove(index, keysArray);
-            System.out.println("REMOVED: " + remove);
+        redisTemplate.executePipelined(new SessionCallback<>() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object execute(RedisOperations operations) {
+                redisTemplate.delete(keys.stream().map(it -> KEY_PREFIX + it).toList());
+
+                Object[] keysArray = keys.toArray(new Object[0]);
+                indexes.forEach(index -> redisTemplate.opsForZSet().remove(index, keysArray));
+                return null;
+            }
         });
 
         removeEmptyIndexes(indexes);
@@ -192,7 +196,7 @@ public class RedisItemRepository {
 
             Set<String> blacklist = new HashSet<>();
             for (String setKey : setKeys) {
-                blacklist.addAll(redisTemplate.opsForSet().difference(tempSetKey, setKey)
+                blacklist.addAll(redisTemplate.opsForSet().intersect(tempSetKey, setKey)
                         .stream()
                         .map(it -> (String) it)
                         .toList());
