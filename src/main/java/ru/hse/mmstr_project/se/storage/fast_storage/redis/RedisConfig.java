@@ -4,8 +4,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import ru.hse.mmstr_project.se.storage.fast_storage.kryo.KryoRedisSerializer;
 
 
 @Configuration
@@ -18,11 +18,8 @@ public class RedisConfig {
 
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new StringRedisSerializer());
-
-        KryoRedisSerializer kryoSerializer = new KryoRedisSerializer();
-
-        template.setValueSerializer(kryoSerializer);
-        template.setHashValueSerializer(kryoSerializer);
+        template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+        template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 
         template.afterPropertiesSet();
         return template;
