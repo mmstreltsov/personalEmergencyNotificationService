@@ -23,6 +23,7 @@ public class RedisConfig {
 
         template.setValueSerializer(kryoSerializer);
         template.setHashValueSerializer(kryoSerializer);
+        template.setDefaultSerializer(kryoSerializer);
 
         template.afterPropertiesSet();
         return template;

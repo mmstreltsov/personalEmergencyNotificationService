@@ -58,6 +58,7 @@ public class FastScheduler extends AbstractScheduler {
         while (iterator.hasNext()) {
             List<IncidentMetadataDto> incidentMetadataDto = iterator.next();
             if (incidentMetadataDto.isEmpty()) {
+                System.out.println("AHAHAHHAHAHAHHAHAHAH");
                 continue;
             }
 

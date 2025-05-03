@@ -6,16 +6,18 @@ import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 import java.util.List;
 
 public final class IncidentMetadataDto {
-    private final String id;
-    private final String name;
-    private final String text;
-    private final Long firstTimeToActivate;
-    private final Long firstTimeToActivateOrigin;
-    private final Integer allowedDelayAfterPing;
-    private final String textToPing;
-    private final String telegramId;
-    private final Long chatId;
-    private final List<FriendMetaDto> listOfFriends;
+    private String id;
+    private String name;
+    private String text;
+    private Long firstTimeToActivate;
+    private Long firstTimeToActivateOrigin;
+    private Integer allowedDelayAfterPing;
+    private String textToPing;
+    private String telegramId;
+    private Long chatId;
+    private List<FriendMetaDto> listOfFriends;
+
+    public IncidentMetadataDto() {}
 
     public IncidentMetadataDto(
             String id,
