@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Service
 public class FastSchedulerManager {
 
-    public static final int DUPLICATES_ALIVE_SECONDS = 120;
+    public static final int DUPLICATES_ALIVE_SECONDS = 180;
 
     private final RedisItemRepository repository;
     private final FastSchedulersMetrics fastSchedulersMetrics;

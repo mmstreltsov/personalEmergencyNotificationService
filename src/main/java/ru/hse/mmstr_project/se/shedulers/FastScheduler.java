@@ -22,7 +22,7 @@ public class FastScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 2;
     private static final int SECONDS_TO_EXTRA_SCAN = 5;
-    private static final int BATCH_SIZE = 128;
+    private static final int BATCH_SIZE = 256;
     private static final long FROM = Instant.EPOCH.getEpochSecond() * 1000;
 
     private final Executor taskExecutor;
