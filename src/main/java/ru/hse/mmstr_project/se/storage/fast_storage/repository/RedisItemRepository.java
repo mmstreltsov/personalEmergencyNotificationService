@@ -24,9 +24,11 @@ import java.util.stream.Collectors;
 public class RedisItemRepository {
 
     private static final String KEY_PREFIX = "incident:";
-    private static final String TIME_SORTED_SET = "incident:time-index";
+    private static final String TIME_SORTED_SET = "incident:time-index:";
     private static final String DEDUP_SET = "dedup:set:";
     private static final String TEMP_CHECK = "temp:check:";
+
+    private static final Integer SHARD_SIZE = 65536;
 
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -45,18 +47,30 @@ public class RedisItemRepository {
                         Function.identity(),
                         (f, s) -> s));
 
-        Map<String, Long> zsetEntries = entityMap.entrySet().stream()
+        Map<String, Long> zsetEntries = entityMap.values().stream()
                 .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        it -> it.getValue().firstTimeToActivate()));
+                        IncidentMetadataDto::id,
+                        incidentMetadataDto -> incidentMetadataDto.firstTimeToActivate()
+                                + incidentMetadataDto.allowedDelayAfterPing() * 1_000));
 
+        Long lastIndexNumber = fetchCurrentIndexes().stream()
+                .map(it -> it.substring(TIME_SORTED_SET.length()))
+                .map(Long::parseLong)
+                .reduce(0L, (a, b) -> a > b ? a : b);
+
+        Long size = redisTemplate.opsForZSet().size(TIME_SORTED_SET + lastIndexNumber);
+        if (Objects.nonNull(size) && size > SHARD_SIZE) {
+            lastIndexNumber++;
+        }
+
+        String index = TIME_SORTED_SET + lastIndexNumber;
         redisTemplate.executePipelined(new SessionCallback<>() {
             @Override
             @SuppressWarnings("unchecked")
             public Object execute(RedisOperations operations) {
 
                 zsetEntries.forEach((member, score) -> {
-                    operations.opsForZSet().add(TIME_SORTED_SET, member, score);
+                    operations.opsForZSet().add(index, member, score);
                 });
 
                 operations.opsForValue().multiSet(entityMap);
@@ -81,11 +95,27 @@ public class RedisItemRepository {
             return;
         }
 
-        redisTemplate.opsForZSet().remove(
-                TIME_SORTED_SET,
-                keys.toArray());
+        List<String> indexes = fetchCurrentIndexes();
 
-        redisTemplate.delete(keys.stream().map(it -> KEY_PREFIX + it).toList());
+        Long deleted = redisTemplate.delete(keys.stream().map(it -> KEY_PREFIX + it).toList());
+        System.out.println("DELETED: " + deleted);
+
+        Object[] keysArray = keys.toArray(new Object[0]);
+        indexes.forEach(index -> {
+            Long remove = redisTemplate.opsForZSet().remove(index, keysArray);
+            System.out.println("REMOVED: " + remove);
+        });
+
+        removeEmptyIndexes(indexes);
+    }
+
+    private void removeEmptyIndexes(List<String> keys) {
+        for (String key : keys) {
+            Long size = redisTemplate.opsForZSet().size(key);
+            if (Objects.isNull(size) || size == 0) {
+                redisTemplate.delete(key);
+            }
+        }
     }
 
     public Iterator<List<IncidentMetadataDto>> getIteratorByFirstTimeToActivateLessThan(
@@ -97,13 +127,17 @@ public class RedisItemRepository {
                 endTime,
                 batchSize,
                 this::fetchBatchFromRedis,
-                this::getEntitiesByIds
-        );
+                this::getEntitiesByIds,
+                this::fetchCurrentIndexes);
     }
 
-    private Set<String> fetchBatchFromRedis(long startTime, long endTime, long offset, int batchSize) {
+    private List<String> fetchCurrentIndexes() {
+        return redisTemplate.keys(TIME_SORTED_SET + "*").stream().toList();
+    }
+
+    private Set<String> fetchBatchFromRedis(long startTime, String indexId, long endTime, long offset, int batchSize) {
         Set<Object> rawResults = redisTemplate.opsForZSet().rangeByScore(
-                TIME_SORTED_SET,
+                indexId,
                 startTime,
                 endTime,
                 offset,
