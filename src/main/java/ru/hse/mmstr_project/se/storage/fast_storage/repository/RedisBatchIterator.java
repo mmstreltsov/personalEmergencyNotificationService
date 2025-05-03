@@ -14,14 +14,16 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
     private final int batchSize;
     private final BatchFetcher batchFetcher;
     private final EntityConverter<T> entityConverter;
+    private final List<String> indexes;
 
     private long currentOffset = 0;
+    private int currentIndexId = 0;
     private List<T> nextBatch = null;
     private boolean noKeys = false;
 
     @FunctionalInterface
     public interface BatchFetcher {
-        Set<String> fetch(long startTime, long endTime, long offset, int batchSize);
+        Set<String> fetch(long startTime, String indexId, long endTime, long offset, int batchSize);
     }
 
     @FunctionalInterface
@@ -29,17 +31,24 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
         List<T> apply(List<String> entities);
     }
 
+    @FunctionalInterface
+    public interface IndexFetcher {
+        List<String> apply();
+    }
+
     public RedisBatchIterator(
             long startTime,
             long endTime,
             int batchSize,
             BatchFetcher batchFetcher,
-            EntityConverter<T> entityConverter) {
+            EntityConverter<T> entityConverter,
+            IndexFetcher indexFetcher) {
         this.startTime = startTime;
         this.endTime = endTime;
         this.batchSize = batchSize;
         this.batchFetcher = batchFetcher;
         this.entityConverter = entityConverter;
+        indexes = indexFetcher.apply();
     }
 
     @Override
@@ -64,12 +73,19 @@ public class RedisBatchIterator<T> implements Iterator<List<T>>, Closeable {
     }
 
     private void loadNextBatch() {
-        Set<String> keys = batchFetcher.fetch(startTime, endTime, currentOffset, batchSize);
-
-        if (keys.isEmpty()) {
+        if (indexes.size() <= currentIndexId) {
             noKeys = true;
             nextBatch = Collections.emptyList();
             return;
+        }
+
+        String index = indexes.get(currentIndexId);
+        Set<String> keys = batchFetcher.fetch(startTime, index, endTime, currentOffset, batchSize);
+
+        if (keys.isEmpty()) {
+            currentIndexId++;
+            currentOffset = 0;
+            loadNextBatch();
         }
 
         nextBatch = entityConverter.apply(new ArrayList<>(keys));

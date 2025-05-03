@@ -31,10 +31,10 @@ public class FastSchedulerManager {
     }
 
     private void handleI(Collection<IncidentMetadataDto> incidentMetadataDtos) {
-        incidentMetadataDtos = filterDuplicates(incidentMetadataDtos);
-
+        List<IncidentMetadataDto> sendToUsers = filterDuplicates(incidentMetadataDtos);
         // kafka
-        repository.removeAll(incidentMetadataDtos.stream().limit(incidentMetadataDtos.size() / 2).toList());
+
+        repository.removeAll(incidentMetadataDtos.stream().toList());
     }
 
     private List<IncidentMetadataDto> filterDuplicates(Collection<IncidentMetadataDto> incidentMetadataDtos) {
@@ -45,7 +45,7 @@ public class FastSchedulerManager {
                 .stream()
                 .toList();
         setProcessedLikeDuplicates(result);
-        fastSchedulersMetrics.incDuplicatesFiltered(result.size() - collect.keySet().size());
+        fastSchedulersMetrics.incDuplicatesFiltered(collect.keySet().size() - result.size());
 
         return result.stream().map(collect::get).toList();
     }
