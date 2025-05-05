@@ -3,6 +3,8 @@ package ru.hse.mmstr_project.se.service;
 import com.google.common.collect.Iterators;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.hse.mmstr_project.se.kafka.dto.PingerDto;
+import ru.hse.mmstr_project.se.service.kafka.PingerService;
 import ru.hse.mmstr_project.se.service.storage.ClientStorage;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.shedulers.metrics.CommonSchedulersMetrics;
@@ -30,16 +32,19 @@ public class CommonSchedulerManager {
     private final ClientStorage clientStorage;
     private final ScenarioStorage scenarioStorage;
     private final CommonSchedulersMetrics commonSchedulersMetrics;
+    private final PingerService pingerService;
 
     public CommonSchedulerManager(
             RedisItemRepository redisItemRepository,
             ClientStorage clientStorage,
             ScenarioStorage scenarioStorage,
-            CommonSchedulersMetrics commonSchedulersMetrics) {
+            CommonSchedulersMetrics commonSchedulersMetrics,
+            PingerService pingerService) {
         this.redisItemRepository = redisItemRepository;
         this.clientStorage = clientStorage;
         this.scenarioStorage = scenarioStorage;
         this.commonSchedulersMetrics = commonSchedulersMetrics;
+        this.pingerService = pingerService;
     }
 
     public void handle(Collection<ScenarioDto> scenarios) {
@@ -65,9 +70,10 @@ public class CommonSchedulerManager {
                 .flatMap(Optional::stream)
                 .toList();
 
-        Iterators.partition(data.iterator(), BATCH_SIZE).forEachRemaining(redisItemRepository::saveAll);
-
-        // add notify to main user
+        Iterators.partition(data.iterator(), BATCH_SIZE).forEachRemaining(entities -> {
+            entities.stream().map(PingerDto::cons).forEach(pingerService::sendMessage);
+            redisItemRepository.saveAll(entities);
+        });
     }
 
     @Transactional

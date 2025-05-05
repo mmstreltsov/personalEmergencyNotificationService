@@ -17,6 +17,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+      kafka:
+        condition: service_healthy
     networks:
       - app-network
     deploy:
@@ -98,13 +100,13 @@ services:
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
+    networks:
+      - app-network
     healthcheck:
       test: [ "CMD", "nc", "-z", "localhost", "2181" ]
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - app-network
 
 
   kafka:
@@ -117,6 +119,7 @@ services:
       - "29092:29092"
     environment:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
@@ -125,10 +128,13 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
       - ./kafka/init.sh:/tmp/init-kafka.sh
+    networks:
+      - app-network
     command: >
       bash -c "
         /etc/confluent/docker/run &
         sleep 10 &&
+        chmod +x /tmp/init-kafka.sh && 
         /tmp/init-kafka.sh &&
         wait
       "
@@ -137,8 +143,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - app-network
 
   prometheus:
     image: prom/prometheus:latest
