@@ -12,6 +12,6 @@ public record MetaRequestDto(
         String data,
         Optional<UpdateParams> updateParams) {
 
-    public record UpdateParams(Long entityId, String field, String action) {
+    public record UpdateParams(String uniqueId, String field, String action) {
     }
 }

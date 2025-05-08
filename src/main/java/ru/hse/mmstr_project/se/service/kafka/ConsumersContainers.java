@@ -8,6 +8,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import ru.hse.mmstr_project.se.kafka.BaseConsumerConfig;
+import ru.hse.mmstr_project.se.service.kafka.consumer.AntispamRequestConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.MetaRequestConsumer;
 
 @Configuration
@@ -24,6 +25,24 @@ public class ConsumersContainers {
 
         ContainerProperties props = new ContainerProperties(topic);
         props.setGroupId(topic + "_1");
+        props.setMessageListener(consumer);
+        props.setAckMode(ContainerProperties.AckMode.MANUAL);
+
+        KafkaMessageListenerContainer<String, Object> container = new KafkaMessageListenerContainer<>(
+                factory.getConsumerFactory(),
+                props);
+        container.setAutoStartup(true);
+        return container;
+    }
+
+    @Bean
+    public KafkaMessageListenerContainer<String, Object> antispamRequestContainer(
+            ConcurrentKafkaListenerContainerFactory<String, Object> factory,
+            AntispamRequestConsumer consumer,
+            @Value("${kafka.topic.name.meta-requests}") String topic) {
+
+        ContainerProperties props = new ContainerProperties(topic);
+        props.setGroupId(topic + "_2");
         props.setMessageListener(consumer);
         props.setAckMode(ContainerProperties.AckMode.MANUAL);
 
