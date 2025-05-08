@@ -9,7 +9,9 @@ public record MetaRequestDto(
         FunctionType functionType,
         EntityType entityType,
         Long chatId,
-        Optional<Long> entityId,
-        String data
-) {
+        String data,
+        Optional<UpdateParams> updateParams) {
+
+    public record UpdateParams(Long entityId, String field, String action) {
+    }
 }
