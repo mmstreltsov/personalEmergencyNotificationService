@@ -4,7 +4,7 @@ import com.google.common.collect.Iterators;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.hse.mmstr_project.se.kafka.dto.PingerDto;
-import ru.hse.mmstr_project.se.service.kafka.PingerService;
+import ru.hse.mmstr_project.se.service.kafka.producer.PingerService;
 import ru.hse.mmstr_project.se.service.storage.ClientStorage;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.shedulers.metrics.CommonSchedulersMetrics;
