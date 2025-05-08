@@ -1,4 +1,4 @@
-package ru.hse.mmstr_project.se.service.kafka;
+package ru.hse.mmstr_project.se.service.kafka.producer;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
