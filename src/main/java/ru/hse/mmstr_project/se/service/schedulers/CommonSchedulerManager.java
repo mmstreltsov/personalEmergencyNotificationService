@@ -1,4 +1,4 @@
-package ru.hse.mmstr_project.se.service;
+package ru.hse.mmstr_project.se.service.schedulers;
 
 import com.google.common.collect.Iterators;
 import org.springframework.stereotype.Service;

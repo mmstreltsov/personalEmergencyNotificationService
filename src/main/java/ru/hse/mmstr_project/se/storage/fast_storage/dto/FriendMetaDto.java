@@ -9,7 +9,6 @@ public record FriendMetaDto(
         String name,
         List<String> wayToNotify,
         String phoneNumber,
-        Integer telegramId,
         Integer chatId,
         String email) {
 
@@ -19,7 +18,6 @@ public record FriendMetaDto(
                 friendDto.getName(),
                 friendDto.getWayToNotify(),
                 friendDto.getPhoneNumber(),
-                friendDto.getTelegramId(),
                 friendDto.getChatId(),
                 friendDto.getEmail());
     }

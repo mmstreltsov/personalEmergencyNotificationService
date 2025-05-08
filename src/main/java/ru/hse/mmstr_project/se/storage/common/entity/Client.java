@@ -22,6 +22,9 @@ public class Client {
     @Column(name = "telegramId", unique = true)
     private String telegramId;
 
+    @Column(name = "name")
+    private String name;
+
     @Column(name = "chatId")
     private Long chatId;
 
@@ -31,7 +34,8 @@ public class Client {
 
     public Client() {}
 
-    public Client(String telegramId, Long chatId, List<Friend> listOfFriends) {
+    public Client(String name, String telegramId, Long chatId, List<Friend> listOfFriends) {
+        this.name = name;
         this.telegramId = telegramId;
         this.chatId = chatId;
         this.listOfFriends = listOfFriends;
@@ -51,6 +55,14 @@ public class Client {
 
     public void setTelegramId(String telegramId) {
         this.telegramId = telegramId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public Long getChatId() {
