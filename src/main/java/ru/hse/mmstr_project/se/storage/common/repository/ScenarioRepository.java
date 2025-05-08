@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 
 import java.time.Instant;
+import java.util.List;
 
 @Repository
 public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
@@ -18,4 +19,6 @@ public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
             @Param("startTime") Instant startTime,
             @Param("endTime") Instant endTime,
             Pageable pageable);
+
+    List<Scenario> findAllByClientIdAndNameContaining(Long clientId, String name);
 }

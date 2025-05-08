@@ -45,4 +45,8 @@ public class ScenarioStorage {
                 cancelled
         );
     }
+
+    public List<ScenarioDto> findAllByClientIdAndName(long id, String name) {
+        return scenarioRepository.findAllByClientIdAndNameContaining(id, name).stream().map(clientMapper::toDto).toList();
+    }
 }

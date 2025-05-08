@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 @Configuration
 public class SpamDetectorConfig {
     @Bean
-    public ExecutorService executorService() {
+    public ExecutorService executorServiceForSpamDetector() {
         return Executors.newCachedThreadPool();
     }
 

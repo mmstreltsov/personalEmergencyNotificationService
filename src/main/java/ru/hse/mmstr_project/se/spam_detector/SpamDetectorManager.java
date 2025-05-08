@@ -1,7 +1,5 @@
 package ru.hse.mmstr_project.se.spam_detector;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import ru.hse.mmstr_project.se.spam_detector.methods.SpamDetector;
 
@@ -15,16 +13,15 @@ import java.util.concurrent.TimeoutException;
 @Component
 public class SpamDetectorManager {
     private static final long WAITING_TIME_IN_MS = 1_000;
-    private static final Logger log = LoggerFactory.getLogger(SpamDetectorManager.class);
 
     private final List<SpamDetector> spamDetector;
     private final ExecutorService executor;
 
     public SpamDetectorManager(
             List<SpamDetector> spamDetector,
-            ExecutorService executor) {
+            ExecutorService executorServiceForSpamDetector) {
         this.spamDetector = spamDetector;
-        this.executor = executor;
+        this.executor = executorServiceForSpamDetector;
     }
 
     public boolean isSpam(String obj) {
@@ -39,7 +36,6 @@ public class SpamDetectorManager {
         try {
             return future.get(WAITING_TIME_IN_MS, TimeUnit.MILLISECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            log.info("Spam detector failed", e);
             return false;
         }
     }
