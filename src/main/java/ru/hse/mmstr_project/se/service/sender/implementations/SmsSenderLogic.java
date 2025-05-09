@@ -64,7 +64,6 @@ public class SmsSenderLogic implements CommonSenderLogic {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        System.out.println(response);
 
         return response.statusCode() == 200;
     }

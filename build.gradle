@@ -31,6 +31,8 @@ dependencies {
 	implementation 'org.apache.commons:commons-pool2'
 	implementation 'com.google.guava:guava:31.1-jre'
 	implementation 'org.springframework.kafka:spring-kafka:3.2.3'
+	implementation 'com.sun.mail:jakarta.mail:2.0.1'
+	implementation 'com.sun.activation:jakarta.activation:2.0.1'
 
 	implementation 'org.mapstruct:mapstruct:1.6.3'
 	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
