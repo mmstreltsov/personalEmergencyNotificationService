@@ -67,19 +67,21 @@ public class EmailSenderLogic implements CommonSenderLogic {
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(destinationEmail));
         message.setSubject("Emergency Notification");
 
+        Multipart multipart = new MimeMultipart();
+
         MimeBodyPart textPart = new MimeBodyPart();
         textPart.setText(request.text());
+        multipart.addBodyPart(textPart);
 
         if (request.data() != null && request.data().length > 0) {
             MimeBodyPart attachmentPart = new MimeBodyPart();
             DataSource source = new ByteArrayDataSource(request.data(), "image/jpeg");
             attachmentPart.setDataHandler(new DataHandler(source));
-            attachmentPart.setFileName("Photo");
-
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(textPart);
+            attachmentPart.setFileName("Photo.jpg");
             multipart.addBodyPart(attachmentPart);
         }
+
+        message.setContent(multipart);
 
         Transport.send(message);
         return true;
