@@ -20,7 +20,7 @@ public class NlpDeepseekSpamDetectorImpl extends AbstractApiModelsDetectorImpl i
             "Сервис помощи людям в экстренной ситуации. Определи, является ли этот текст спамом, ответь только Да или Нет: ";
 
     public NlpDeepseekSpamDetectorImpl(
-            @Value("${huggingface.token}") String bearerToken,
+            @Value("${openrouter.token}") String bearerToken,
             HttpClient httpClientForMl) {
         super(httpClientForMl, bearerToken);
     }
