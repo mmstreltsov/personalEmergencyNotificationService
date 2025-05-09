@@ -1,14 +1,12 @@
 package ru.hse.mmstr_project.se.service.kafka.consumer;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.kafka.listener.BatchAcknowledgingMessageListener;
+import org.springframework.kafka.listener.AcknowledgingMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 import ru.hse.mmstr_project.se.kafka.dto.SenderRequestDto;
 import ru.hse.mmstr_project.se.service.sender.implementations.CommonSenderLogic;
 
-import java.util.List;
-
-public abstract class CommonSenderConsumer implements BatchAcknowledgingMessageListener<String, Object> {
+public abstract class CommonSenderConsumer implements AcknowledgingMessageListener<String, Object> {
 
     protected final CommonSenderLogic manager;
 
@@ -17,15 +15,9 @@ public abstract class CommonSenderConsumer implements BatchAcknowledgingMessageL
     }
 
     @Override
-    public void onMessage(List<ConsumerRecord<String, Object>> records, Acknowledgment acknowledgment) {
-        try {
-            List<SenderRequestDto> batch = records.stream()
-                    .map(ConsumerRecord::value)
-                    .filter(it -> it instanceof SenderRequestDto)
-                    .map(it -> (SenderRequestDto) it)
-                    .toList();
-            manager.sendMessage(batch);
-        } finally {
+    public void onMessage(ConsumerRecord<String, Object> record, Acknowledgment acknowledgment) {
+        Object value = record.value();
+        if (!(value instanceof SenderRequestDto) || manager.sendMessage((SenderRequestDto) value)) {
             acknowledgment.acknowledge();
         }
     }
