@@ -1,5 +1,5 @@
 CREATE INDEX idx_first_time_to_activate
-    ON Scenario (firstTimeToActivate)
+    ON Scenario (firstTimeToActivate);
 
 CREATE INDEX scenarios_chat_ids
     ON Scenario (clientId, name);

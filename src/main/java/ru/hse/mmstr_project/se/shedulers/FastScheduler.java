@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import ru.hse.mmstr_project.se.service.FastSchedulerManager;
+import ru.hse.mmstr_project.se.service.schedulers.FastSchedulerManager;
 import ru.hse.mmstr_project.se.shedulers.metrics.FastSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.common.repository.system.SchedulersStateRepository;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;

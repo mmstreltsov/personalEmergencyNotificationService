@@ -7,7 +7,7 @@ public class FriendDto {
     private String name;
     private List<String> wayToNotify;
     private String phoneNumber;
-    private Integer telegramId;
+    private String telegramId;
     private Integer chatId;
     private String email;
 
@@ -19,7 +19,7 @@ public class FriendDto {
             String name,
             List<String> wayToNotify,
             String phoneNumber,
-            Integer telegramId,
+            String telegramId,
             Integer chatId,
             String email) {
         this.id = id;
@@ -63,11 +63,11 @@ public class FriendDto {
         this.phoneNumber = phoneNumber;
     }
 
-    public Integer getTelegramId() {
+    public String getTelegramId() {
         return telegramId;
     }
 
-    public void setTelegramId(Integer telegramId) {
+    public void setTelegramId(String telegramId) {
         this.telegramId = telegramId;
     }
 
@@ -118,7 +118,7 @@ public class FriendDto {
             return this;
         }
 
-        public Builder telegramId(Integer telegramId) {
+        public Builder telegramId(String telegramId) {
             friendDto.telegramId = telegramId;
             return this;
         }

@@ -1,6 +1,7 @@
-package ru.hse.mmstr_project.se.service;
+package ru.hse.mmstr_project.se.service.schedulers;
 
 import org.springframework.stereotype.Service;
+import ru.hse.mmstr_project.se.service.sender.SenderService;
 import ru.hse.mmstr_project.se.shedulers.metrics.FastSchedulersMetrics;
 import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 import ru.hse.mmstr_project.se.storage.fast_storage.repository.RedisItemRepository;
@@ -18,12 +19,15 @@ public class FastSchedulerManager {
 
     private final RedisItemRepository repository;
     private final FastSchedulersMetrics fastSchedulersMetrics;
+    private final SenderService senderService;
 
     public FastSchedulerManager(
             RedisItemRepository repository,
-            FastSchedulersMetrics fastSchedulersMetrics) {
+            FastSchedulersMetrics fastSchedulersMetrics,
+            SenderService senderService) {
         this.repository = repository;
         this.fastSchedulersMetrics = fastSchedulersMetrics;
+        this.senderService = senderService;
     }
 
     public void handle(Collection<IncidentMetadataDto> incidentMetadataDtos) {
@@ -32,8 +36,7 @@ public class FastSchedulerManager {
 
     private void handleI(Collection<IncidentMetadataDto> incidentMetadataDtos) {
         List<IncidentMetadataDto> sendToUsers = filterDuplicates(incidentMetadataDtos);
-        // kafka
-
+        senderService.send(sendToUsers);
         repository.removeAll(incidentMetadataDtos.stream().toList());
     }
 

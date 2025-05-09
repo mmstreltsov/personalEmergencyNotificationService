@@ -14,6 +14,7 @@ public record IncidentMetadataDto(
         Integer allowedDelayAfterPing,
         String textToPing,
         String telegramId,
+        String username,
         Long chatId,
         List<FriendMetaDto> listOfFriends
 ) {
@@ -28,6 +29,7 @@ public record IncidentMetadataDto(
                 scenarioDto.getAllowedDelayAfterPing(),
                 scenarioDto.getTextToPing(),
                 clientDto.getTelegramId(),
+                clientDto.getName(),
                 clientDto.getChatId(),
                 clientDto.getListOfFriends().stream().map(FriendMetaDto::parse).toList());
     }
