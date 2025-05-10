@@ -9,6 +9,7 @@ import ru.hse.mmstr_project.se.storage.common.repository.ClientRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClientStorage {
@@ -26,7 +27,16 @@ public class ClientStorage {
     }
 
     @Transactional
+    public void save(ClientDto scenarioDto) {
+        clientRepository.save(clientMapper.toEntity(scenarioDto));
+    }
+
+    @Transactional
     public List<ClientDto> findAllByIds(Collection<Long> ids) {
         return clientRepository.findAllById(ids).stream().map(clientMapper::toDto).toList();
+    }
+
+    public Optional<ClientDto> findByChatId(Long chatId) {
+        return clientRepository.findByChatId(chatId).map(clientMapper::toDto);
     }
 }

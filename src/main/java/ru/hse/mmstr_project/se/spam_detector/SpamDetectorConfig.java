@@ -16,7 +16,7 @@ public class SpamDetectorConfig {
     }
 
     @Bean
-    public ObjectMapper objectMapper() {
+    public ObjectMapper objectMapperForSpamDetector() {
         return new ObjectMapper();
     }
 

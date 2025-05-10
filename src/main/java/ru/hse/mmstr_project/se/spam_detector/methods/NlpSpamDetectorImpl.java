@@ -18,16 +18,15 @@ public class NlpSpamDetectorImpl extends AbstractApiModelsDetectorImpl implement
     private static final String API_URL = "https://api-inference.huggingface.co/models/t-bank-ai/ruDialoGPT-small";
     private static final String NLP_PROMPT =
             "Сервис помощи людям в экстренной ситуации. Определи, является ли этот текст спамом, ответь только Да или Нет: ";
-    private static final String YES = "да";
 
     private final ObjectMapper objectMapper;
 
     public NlpSpamDetectorImpl(
             @Value("${huggingface.token}") String bearerToken,
             HttpClient httpClientForMl,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapperForSpamDetector) {
         super(httpClientForMl, bearerToken);
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapperForSpamDetector;
     }
 
     @Override

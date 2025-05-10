@@ -1,6 +1,7 @@
 package ru.hse.mmstr_project.se.storage.common.dto;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FriendDto {
     private Integer id;
@@ -51,8 +52,8 @@ public class FriendDto {
         return wayToNotify;
     }
 
-    public void setWayToNotify(List<String> aWayToNotify) {
-        this.wayToNotify = aWayToNotify;
+    public void setWayToNotify(List<String> wayToNotify) {
+        this.wayToNotify = wayToNotify;
     }
 
     public String getPhoneNumber() {
@@ -137,6 +138,27 @@ public class FriendDto {
             return friendDto;
         }
     }
+
+    public String toBeautyString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ID: ").append(id).append('\n');
+        builder.append("Контакт: ").append(Optional.ofNullable(name).orElse("Имя не указано")).append('\n');
+
+        Optional.ofNullable(wayToNotify).filter(it -> !it.isEmpty()).ifPresent(it ->
+                builder.append("Предпочитаемые способы связи: ").append(String.join(", ", it)).append('\n'));
+
+        Optional.ofNullable(phoneNumber).filter(it -> !it.isEmpty()).ifPresent(it ->
+                builder.append("Телефон: ").append(it).append('\n'));
+
+        Optional.ofNullable(telegramId).filter(it -> !it.isEmpty()).ifPresent(it ->
+                builder.append("Telegram: @").append(it).append('\n'));
+
+        Optional.ofNullable(email).filter(it -> !it.isEmpty()).ifPresent(it ->
+                builder.append("Email: ").append(it).append('\n'));
+
+        return builder.toString().trim();
+    }
+
 
     @Override
     public String toString() {

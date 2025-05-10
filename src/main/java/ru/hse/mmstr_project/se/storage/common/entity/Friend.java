@@ -16,7 +16,7 @@ public class Friend {
     @JsonProperty("phoneNumber")
     private String phoneNumber;
     @JsonProperty("telegramId")
-    private Integer telegramId;
+    private String telegramId;
     @JsonProperty("chatId")
     private Integer chatId;
     @JsonProperty("email")
@@ -41,12 +41,12 @@ public class Friend {
         this.name = name;
     }
 
-    public List<String> geAWayToNotify() {
+    public List<String> getWayToNotify() {
         return wayToNotify;
     }
 
-    public void setWayToNotify(List<String> aWayToNotify) {
-        this.wayToNotify = aWayToNotify;
+    public void setWayToNotify(List<String> wayToNotify) {
+        this.wayToNotify = wayToNotify;
     }
 
     public String getPhoneNumber() {
@@ -57,11 +57,11 @@ public class Friend {
         this.phoneNumber = phoneNumber;
     }
 
-    public Integer getTelegramId() {
+    public String getTelegramId() {
         return telegramId;
     }
 
-    public void setTelegramId(Integer telegramId) {
+    public void setTelegramId(String telegramId) {
         this.telegramId = telegramId;
     }
 
