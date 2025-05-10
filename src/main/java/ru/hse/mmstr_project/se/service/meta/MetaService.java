@@ -28,18 +28,19 @@ public class MetaService {
     }
 
     private void handleOne(MetaRequestDto request) {
-        String response;
+        Optional<String> response;
         Long chatId = request.chatId();
 
         MessageType messageType = new MessageType(request.entityType(), request.functionType());
         try {
             response = Optional.ofNullable(handlers.get(messageType))
                     .map(it -> it.handle(request))
-                    .orElse("Ошибка, не найден обработчик сообщения");
+                    .orElse(Optional.of("Ошибка, не найден обработчик сообщения"));
         } catch (Exception e) {
-            response = e.getMessage();
+            System.out.println(e);
+            response = Optional.of(e.getMessage());
         }
 
-        responser.sendMessage(new TgBotRequestDto(response, chatId));
+        response.ifPresent(it -> responser.sendMessage(new TgBotRequestDto(it, chatId)));
     }
 }

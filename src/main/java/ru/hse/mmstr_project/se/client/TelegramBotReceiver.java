@@ -15,6 +15,7 @@ public class TelegramBotReceiver extends TelegramLongPollingBot {
 
     private static final String SPACE = " ";
     private static final String ERROR_CASE = "Ваша команда не распознана";
+    private static final String RUNTIME_ERROR_CASE = "Ошибка при выполнении команды";
 
     private final String botUsername;
     private final Map<String, CommandHandler> handlers;
@@ -46,13 +47,17 @@ public class TelegramBotReceiver extends TelegramLongPollingBot {
         Long chatId = update.getMessage().getChatId();
 
         String[] input = messageText.split(SPACE);
-        (input.length > 0 ? Optional.of(input[0].toLowerCase()) : Optional.<String>empty())
-                .flatMap(it -> Optional.ofNullable(handlers.get(it)))
-                .map(cons -> {
-                    String args = String.join(SPACE, Arrays.stream(input).skip(1).toList()).trim();
-                    return cons.handle(args, chatId);
-                })
-                .orElse(Optional.of(ERROR_CASE))
-                .ifPresent(response -> telegramBotSender.sendMessage(chatId, response));
+        try {
+            (input.length > 0 ? Optional.of(input[0].toLowerCase()) : Optional.<String>empty())
+                    .flatMap(it -> Optional.ofNullable(handlers.get(it)))
+                    .map(cons -> {
+                        String args = String.join(SPACE, Arrays.stream(input).skip(1).toList()).trim();
+                        return cons.handle(args, chatId, update.getMessage());
+                    })
+                    .orElse(Optional.of(ERROR_CASE))
+                    .ifPresent(response -> telegramBotSender.sendMessage(chatId, response));
+        } catch (Exception e) {
+            telegramBotSender.sendMessage(chatId, RUNTIME_ERROR_CASE);
+        }
     }
 }
