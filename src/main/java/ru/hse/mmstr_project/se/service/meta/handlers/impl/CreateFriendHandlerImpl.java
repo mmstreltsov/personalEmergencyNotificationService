@@ -43,7 +43,7 @@ public class CreateFriendHandlerImpl implements MetaRequestHandler {
             return Optional.of(response.toString());
         }
 
-        int id = friendDtos.size() + 1;
+        int id = friendDtos.stream().map(FriendDto::getId).reduce(0, (a, b) -> a > b ? a : b) + 1;
         friendDtos.add(new FriendDto(id, "", List.of(), "", "", null, ""));
         clientDto.setListOfFriends(friendDtos);
 
