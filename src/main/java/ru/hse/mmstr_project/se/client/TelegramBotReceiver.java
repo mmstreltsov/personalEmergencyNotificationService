@@ -23,11 +23,11 @@ public class TelegramBotReceiver extends TelegramLongPollingBot {
     public TelegramBotReceiver(
             @Value("${tg.bot.main.client.token}") String botToken,
             @Value("${tg.bot.main.client.username}") String botUsername,
-            Map<String, CommandHandler> handlers,
+            Map<String, CommandHandler> commandHandlers,
             TelegramBotSender telegramBotSender) {
         super(botToken);
         this.botUsername = botUsername;
-        this.handlers = handlers;
+        this.handlers = commandHandlers;
         this.telegramBotSender = telegramBotSender;
     }
 
