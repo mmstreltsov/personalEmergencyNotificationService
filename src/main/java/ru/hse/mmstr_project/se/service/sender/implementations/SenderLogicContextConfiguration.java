@@ -10,7 +10,7 @@ import java.net.http.HttpClient;
 public class SenderLogicContextConfiguration {
 
     @Bean
-    public ObjectMapper objectMapper() {
+    public ObjectMapper objectMapperForSender() {
         return new ObjectMapper();
     }
 

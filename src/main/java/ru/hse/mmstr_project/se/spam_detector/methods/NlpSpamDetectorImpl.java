@@ -24,9 +24,9 @@ public class NlpSpamDetectorImpl extends AbstractApiModelsDetectorImpl implement
     public NlpSpamDetectorImpl(
             @Value("${huggingface.token}") String bearerToken,
             HttpClient httpClientForMl,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapperForSpamDetector) {
         super(httpClientForMl, bearerToken);
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapperForSpamDetector;
     }
 
     @Override
