@@ -9,6 +9,7 @@ services:
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
       - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - JASYPT_MY_MAIN_SECRET_IS=${JASYPT_MY_MAIN_SECRET_IS}
     ports:
       - "8080:8080"

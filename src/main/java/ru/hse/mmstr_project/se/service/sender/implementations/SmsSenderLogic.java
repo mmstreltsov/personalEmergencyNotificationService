@@ -28,11 +28,11 @@ public class SmsSenderLogic implements CommonSenderLogic {
             @Qualifier("httpClientForSms") HttpClient httpClient,
             @Value("${sms.sender.mts.exolve.token}") String apiKey,
             @Value("${sms.sender.mts.exolve.number}") String sourceNumber,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapperForSender) {
         this.httpClient = httpClient;
         this.apiKey = apiKey;
         this.sourceNumber = sourceNumber;
-        this.objectMapper = objectMapper;
+        this.objectMapper = objectMapperForSender;
     }
 
 
