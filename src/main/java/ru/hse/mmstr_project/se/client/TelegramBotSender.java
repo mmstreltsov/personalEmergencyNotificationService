@@ -15,11 +15,14 @@ public class TelegramBotSender extends DefaultAbsSender {
         super(new DefaultBotOptions(), botToken);
     }
 
-    public void sendMessage(Long chatId, String text) throws TelegramApiException {
+    public void sendMessage(Long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
 
-        execute(message);
+        try {
+            execute(message);
+        } catch (TelegramApiException ignored) {
+        }
     }
 }
