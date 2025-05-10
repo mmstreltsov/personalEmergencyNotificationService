@@ -31,30 +31,14 @@ public class SenderService {
     }
 
     private void sendOne(SenderRequestDto send) {
-        if (isTgSender(send.wayToNotify())) {
+        if (SenderWayToNotifyUtil.isTgSender(send.wayToNotify())) {
             senderProducer.sendMessageToTg(send);
         }
-        if (isEmailSender(send.wayToNotify())) {
+        if (SenderWayToNotifyUtil.isEmailSender(send.wayToNotify())) {
             senderProducer.sendMessageToEmail(send);
         }
-        if (isSmsSender(send.wayToNotify())) {
+        if (SenderWayToNotifyUtil.isSmsSender(send.wayToNotify())) {
             senderProducer.sendMessageToSms(send);
         }
-    }
-
-    private boolean isTgSender(List<String> wayToNotify) {
-        return isSenderImpl(wayToNotify, "tg");
-    }
-
-    private boolean isEmailSender(List<String> wayToNotify) {
-        return isSenderImpl(wayToNotify, "email");
-    }
-
-    private boolean isSmsSender(List<String> wayToNotify) {
-        return isSenderImpl(wayToNotify, "sms");
-    }
-
-    private boolean isSenderImpl(List<String> wayToNotify, String text) {
-        return wayToNotify.stream().anyMatch(way -> way.contains(text));
     }
 }

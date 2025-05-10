@@ -41,12 +41,12 @@ public class Friend {
         this.name = name;
     }
 
-    public List<String> geAWayToNotify() {
+    public List<String> getWayToNotify() {
         return wayToNotify;
     }
 
-    public void setWayToNotify(List<String> aWayToNotify) {
-        this.wayToNotify = aWayToNotify;
+    public void setWayToNotify(List<String> wayToNotify) {
+        this.wayToNotify = wayToNotify;
     }
 
     public String getPhoneNumber() {

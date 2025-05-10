@@ -51,8 +51,8 @@ public class FriendDto {
         return wayToNotify;
     }
 
-    public void setWayToNotify(List<String> aWayToNotify) {
-        this.wayToNotify = aWayToNotify;
+    public void setWayToNotify(List<String> wayToNotify) {
+        this.wayToNotify = wayToNotify;
     }
 
     public String getPhoneNumber() {
