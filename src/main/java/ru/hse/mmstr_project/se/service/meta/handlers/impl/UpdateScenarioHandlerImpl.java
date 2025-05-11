@@ -37,41 +37,17 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
     }
 
     private Optional<String> handleOne(MetaRequestDto requestDto, ScenarioDto scenarioDto) {
-        if (Objects.nonNull(scenarioDto.getName())) {
-            if (!scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), scenarioDto.getName()).isEmpty()) {
-                return Optional.of("Сценарий с указанным именем уже существует, пропускаю изменение");
-            }
-        }
-
-        Optional<List<ScenarioDto>> scenariosO = Optional.ofNullable(scenarioDto.getUuid())
-                .map(scenarioStorage::findAllByUuid)
-                .or(() -> Optional.of(scenarioDto.getName())
-                        .map(name -> scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), name)));
-
-        if (scenariosO.isEmpty()) {
-            return Optional.of("Не предоставлен uuid или name -- не могу найти сценарии");
-        }
-        scenarioStorage.saveAll(scenariosO.get().stream().map(it -> updating(it, scenarioDto)).toList());
+        List<ScenarioDto> scenario = findAllByScenario(scenarioDto, requestDto.chatId());
+        scenarioStorage.saveAll(scenario.stream().map(it -> updating(it, scenarioDto)).toList());
 
         return Optional.empty();
     }
 
     protected Optional<String> handleMultiple(MetaRequestDto requestDto, List<ScenarioDto> scenarioDtos) {
-        if (Objects.nonNull(scenarioDtos.getFirst().getName())) {
-            if (!scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), scenarioDtos.getFirst().getName()).isEmpty()) {
-                return Optional.of("Сценарий с указанным именем уже существует, пропускаю изменение");
-            }
-        }
 
-        Optional<List<ScenarioDto>> scenariosO = Optional.ofNullable(scenarioDtos.getFirst().getUuid())
-                .map(scenarioStorage::findAllByUuid)
-                .or(() -> Optional.of(scenarioDtos.getFirst().getName())
-                        .map(name -> scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), name)));
-        if (scenariosO.isEmpty()) {
-            return Optional.of("Не предоставлен uuid или name -- не могу найти сценарии");
-        }
+        List<ScenarioDto> scenario = findAllByScenario(scenarioDtos.getFirst(), requestDto.chatId());
 
-        List<ScenarioDto> dtosFromDb = new ArrayList<>(scenariosO.get());
+        List<ScenarioDto> dtosFromDb = new ArrayList<>(scenario);
         List<Long> toDelete = new ArrayList<>();
 
         while (dtosFromDb.size() < scenarioDtos.size()) {
@@ -88,6 +64,30 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         saveAndDelete(result, toDelete);
 
         return Optional.empty();
+    }
+
+    private List<ScenarioDto> findAllByScenario(ScenarioDto scenarioDto, Long chatId) {
+        if (Objects.nonNull(scenarioDto.getName())) {
+            if (!scenarioStorage.findAllByClientIdAndName(chatId, scenarioDto.getName()).isEmpty()) {
+                throw new RuntimeException("Сценарий с указанным именем уже существует, пропускаю изменение");
+            }
+        }
+
+        Optional<List<ScenarioDto>> scenariosO = Optional.ofNullable(scenarioDto.getUuid())
+                .map(scenarioStorage::findAllByUuid)
+                .filter(it -> !it.isEmpty())
+                .or(() -> Optional.of(scenarioDto.getName())
+                        .map(name -> scenarioStorage.findAllByClientIdAndName(chatId, name)));
+        if (scenariosO.isEmpty()) {
+            throw new RuntimeException("Не предоставлен uuid или name -- не могу найти сценарии");
+        }
+
+        List<ScenarioDto> result = scenariosO.get();
+        if (!result.stream().map(ScenarioDto::getClientId).allMatch(it -> it.equals(chatId))) {
+            throw new RuntimeException("Захвачены чужие сценарии, конфликт имен или айдишников. Попробуйте изменить name");
+        }
+
+        return result;
     }
 
     protected void saveAndDelete(List<ScenarioDto> scenarioDtos, List<Long> toDelete) {
