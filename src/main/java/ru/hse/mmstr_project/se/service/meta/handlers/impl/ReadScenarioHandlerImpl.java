@@ -6,14 +6,54 @@ import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
 import ru.hse.mmstr_project.se.service.meta.MessageType;
 import ru.hse.mmstr_project.se.service.meta.handlers.MetaRequestHandler;
+import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
+import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class ReadScenarioHandlerImpl implements MetaRequestHandler {
+
+    private final ScenarioStorage scenarioStorage;
+
+    public ReadScenarioHandlerImpl(ScenarioStorage scenarioStorage) {
+        this.scenarioStorage = scenarioStorage;
+    }
+
     @Override
     public Optional<String> handle(MetaRequestDto requestDto) {
-        return Optional.empty();
+        List<ScenarioDto> scenarios = scenarioStorage.findAllByClientId(requestDto.chatId());
+
+        Map<UUID, Set<Instant>> timesToActivate = new HashMap<>();
+        Map<UUID, ScenarioDto> collect = scenarios.stream().collect(Collectors.toMap(
+                ScenarioDto::getUuid,
+                it -> {
+                    Set<Instant> set = timesToActivate.getOrDefault(it.getUuid(), new HashSet<>());
+                    set.add(it.getFirstTimeToActivateOrigin());
+                    timesToActivate.put(it.getUuid(), set);
+
+                    return it;
+                },
+                ((f, s) -> {
+                    timesToActivate.get(f.getUuid()).add(s.getFirstTimeToActivateOrigin());
+                    return f;
+                })));
+
+        StringBuilder response = new StringBuilder();
+        collect.forEach((key, value) -> response
+                .append(value.toBeautyString())
+                .append(ScenarioDto.timesToString(timesToActivate.get(key)))
+                .append("\n\n"));
+
+        return Optional.of(response.toString());
     }
 
     @Override

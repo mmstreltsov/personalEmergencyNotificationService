@@ -64,14 +64,8 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         saveAndDelete(result, toDelete);
 
         if (Objects.nonNull(scenarioDtos.getFirst().getFirstTimeToActivate())) {
-            StringBuilder response = new StringBuilder("Сценарию проставлено время срабатывания (в UTC):\n")
-                    .append("`")
-                    .append(String.join(" ", result.stream()
-                            .filter(it -> Objects.nonNull(it.getFirstTimeToActivate()))
-                            .map(it -> it.getFirstTimeToActivate().toString())
-                            .toList()))
-                    .append("`");
-            return Optional.of(response.toString());
+            return Optional.of(ScenarioDto.timesToString(
+                    result.stream().map(ScenarioDto::getFirstTimeToActivate).filter(Objects::nonNull).toList()));
         }
 
 

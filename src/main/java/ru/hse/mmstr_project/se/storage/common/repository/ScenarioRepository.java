@@ -21,6 +21,8 @@ public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
             @Param("endTime") Instant endTime,
             Pageable pageable);
 
+    List<Scenario> findAllByClientId(Long clientId);
+
     List<Scenario> findAllByClientIdAndNameContaining(Long clientId, String name);
 
     List<Scenario> findAllByUuid(UUID uuid);

@@ -56,6 +56,10 @@ public class ScenarioStorage {
         return scenarioRepository.findAllByClientIdAndNameContaining(id, name).stream().map(clientMapper::toDto).toList();
     }
 
+    public List<ScenarioDto> findAllByClientId(long id) {
+        return scenarioRepository.findAllByClientId(id).stream().map(clientMapper::toDto).toList();
+    }
+
     public List<ScenarioDto> findAllByUuid(UUID uuid) {
         return scenarioRepository.findAllByUuid(uuid).stream().map(clientMapper::toDto).toList();
     }
