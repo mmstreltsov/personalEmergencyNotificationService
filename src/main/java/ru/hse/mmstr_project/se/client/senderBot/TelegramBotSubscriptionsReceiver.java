@@ -53,7 +53,10 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
         Long chatId = update.getMessage().getChatId();
         String[] args = update.getMessage().getText().trim().split(" ");
 
-        if (args.length == 1 && args[0].equals("/help")) {
+        if (args.length == 1 && args[0].equalsIgnoreCase("/start")) {
+            return;
+        }
+        if (args.length == 1 && args[0].equalsIgnoreCase("/help")) {
             callback(HELP_TEXT, chatId);
             return;
         }
@@ -76,11 +79,11 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
                 Optional.of(friendDto),
                 List.of());
 
-        switch (args[0]) {
-            case "subscribe":
+        switch (args[0].toLowerCase()) {
+            case "/subscribe":
                 friendDto.setChatId(Math.toIntExact(chatId));
                 break;
-            case "unsubscribe":
+            case "/unsubscribe":
                 friendDto.setChatId(0);
                 break;
             default:
