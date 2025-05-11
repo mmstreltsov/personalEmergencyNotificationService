@@ -54,7 +54,7 @@ public class UpdateFriendHandlerImpl implements MetaRequestHandler {
                     Внимание, ваш контакт может получить сообщение в телеграм только после подписки на вас через бота.
                     Перешлите ему это сообщение:
                     
-                    `Зайдите в телеграм-бота @EmergencyNotificationsSender_bot и выполните /start и `/subscribe %s``
+                    `Зайдите в телеграм-бота @EmergencyNotificationsSender_bot и выполните /start и /subscribe %s`
                     """, requestDto.chatId().toString()));
         }
 
