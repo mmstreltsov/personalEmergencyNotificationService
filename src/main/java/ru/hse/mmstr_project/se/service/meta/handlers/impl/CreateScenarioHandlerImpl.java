@@ -20,7 +20,7 @@ public class CreateScenarioHandlerImpl implements MetaRequestHandler {
 
     private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
-    public static final String DEFAULT_SCENARIO_NAME = "Scenario-" + Instant.now().getEpochSecond();
+    public static final String DEFAULT_SCENARIO_NAME = "Scenario-" + Instant.now().getNano();
     public static final String DEFAULT_SCENARIO_TEXT = "Я в беде";
     public static final String DEFAULT_SCENARIO_PING = "С вами все хорошо? Отправьте /confirm для остановки эскалации";
 
@@ -39,7 +39,7 @@ public class CreateScenarioHandlerImpl implements MetaRequestHandler {
 
         String id = scenarioStorage.save(scenarioDto);
 
-        return Optional.of("Создан сценарий с id: " + id);
+        return Optional.of("Создан сценарий с id:\n\n `" + id + "`");
     }
 
     private CreateScenarioDto getDefaultCreateScenarioDto(Long chatId) {

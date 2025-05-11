@@ -19,6 +19,7 @@ public class TelegramBotSender extends DefaultAbsSender {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
         message.setText(text);
+        message.setParseMode("MarkDown");
 
         try {
             execute(message);
