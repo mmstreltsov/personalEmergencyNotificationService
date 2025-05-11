@@ -63,7 +63,8 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         }
         saveAndDelete(result, toDelete);
 
-        return Optional.empty();
+        return Optional.of("Сценарию проставлено время срабатывания (в UTC): "
+                + String.join(" ", result.stream().map(it -> it.getFirstTimeToActivate().toString()).toList()));
     }
 
     private List<ScenarioDto> findAllByScenario(ScenarioDto scenarioDto, Long chatId) {

@@ -39,11 +39,11 @@ public class AntispamService {
         if (!request.entityType().equals(EntityType.SCENARIO) && !request.functionType().equals(FunctionType.UPDATE)) {
             return;
         }
-        Optional<ScenarioDto> scenarioDtoO = request.scenarioDto();
+        List<ScenarioDto> scenarioDtoO = Optional.ofNullable(request.scenarioDto()).orElse(List.of());
         if (scenarioDtoO.isEmpty()) {
             return;
         }
-        ScenarioDto scenarioDto = scenarioDtoO.get();
+        ScenarioDto scenarioDto = scenarioDtoO.getFirst();
 
         Optional<String> text = Optional.ofNullable(scenarioDto.getText());
         if (text.isEmpty()) {
@@ -72,7 +72,7 @@ public class AntispamService {
 
         scenarioStorage.saveAll(scenarioDtos);
         if (!ok) {
-            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: ты не пройдешь {" + scenarioDtos.get(0).getUuid() + "}", request.chatId()));
+            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: ты не пройдешь {" + scenarioDtos.getFirst().getUuid() + "}", request.chatId()));
         }
     }
 }
