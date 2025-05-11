@@ -35,7 +35,7 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
                 return Optional.of("Ничего не делается");
             }
 
-            repository.removeFromIndex(lastScenario.get().toString());
+            repository.removeFromIndex(lastScenario.get().getUuid().toString());
             return Optional.of("Эскалация остановлена для сценария: " + lastScenario.get().getName());
         } else if (Optional.ofNullable(requestDto.scenarioDto().getFirst().getAllowedDelayAfterPing()).isPresent()) {
             Optional<ScenarioDto> nextScenario = scenarioStorage.findNextAlertByChatId(requestDto.chatId());

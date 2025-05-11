@@ -9,6 +9,7 @@ import ru.hse.mmstr_project.se.service.meta.handlers.MetaRequestHandler;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -23,7 +24,8 @@ public class ReadAlertHandlerImpl implements MetaRequestHandler {
     @Override
     public Optional<String> handle(MetaRequestDto requestDto) {
         Optional<ScenarioDto> nextScenario = scenarioStorage.findNextAlertByChatId(requestDto.chatId());
-        return nextScenario.map(ScenarioDto::toBeautyString).or(() -> Optional.of("Не нашлось сценария для /skip-next"));
+        return nextScenario.map(scenarioDto -> scenarioDto.toBeautyString() + ScenarioDto.timesToString(List.of(scenarioDto.getFirstTimeToActivate())))
+                .or(() -> Optional.of("Не нашлось сценария для /skip-next"));
     }
 
     @Override

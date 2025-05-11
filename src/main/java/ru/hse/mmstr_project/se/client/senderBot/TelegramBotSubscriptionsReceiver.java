@@ -18,7 +18,7 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
 
     private static final String HELP_TEXT = """
             Бот для определения подписки на состояние пользователей.
-            
+                        
             /subscribe {id} -- подписаться на пользователя
             /unsubscribe {id} -- отписаться от пользователя пользователя
             /help -- вывести это сообщение
@@ -66,7 +66,13 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
             return;
         }
 
-        Long mainUserChatId = Long.parseLong(args[1]);
+        long mainUserChatId;
+        try {
+            mainUserChatId = Long.parseLong(args[1]);
+        } catch (NumberFormatException e) {
+            callback("Не могу распарсить ввод, введено не число", chatId);
+            return;
+        }
 
         FriendDto friendDto = new FriendDto();
         friendDto.setTelegramId(update.getMessage().getFrom().getUserName());
