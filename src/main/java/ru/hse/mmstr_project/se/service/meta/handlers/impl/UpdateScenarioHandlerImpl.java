@@ -10,6 +10,7 @@ import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -28,6 +29,12 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
             return Optional.of("Ничего не делается");
         }
         ScenarioDto scenarioDto = scenarioDtoO.get();
+
+        if (Objects.nonNull(scenarioDto.getName())) {
+            if (!scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), scenarioDto.getName()).isEmpty()) {
+                return Optional.of("Сценарий с указанным именем уже существует, пропускаю изменение");
+            }
+        }
 
         Optional<List<ScenarioDto>> scenariosO = Optional.ofNullable(scenarioDto.getUuid())
                 .map(scenarioStorage::findAllByUuid)

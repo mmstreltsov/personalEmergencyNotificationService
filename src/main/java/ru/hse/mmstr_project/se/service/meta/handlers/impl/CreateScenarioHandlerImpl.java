@@ -35,7 +35,16 @@ public class CreateScenarioHandlerImpl implements MetaRequestHandler {
     public Optional<String> handle(MetaRequestDto requestDto) {
 
         CreateScenarioDto scenarioDto = getDefaultCreateScenarioDto(requestDto.chatId());
-        requestDto.scenarioDto().map(ScenarioDto::getName).filter(it -> !it.isEmpty()).ifPresent(scenarioDto::setName);
+        Optional<String> nameO = requestDto.scenarioDto().map(ScenarioDto::getName).filter(it -> !it.isEmpty());
+
+        if (nameO.isPresent()) {
+            String name = nameO.get();
+
+            if (!scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), name).isEmpty()) {
+                return Optional.of("Сценарий с указанным именем уже существует, пропускаю создание");
+            }
+            nameO.ifPresent(scenarioDto::setName);
+        }
 
         String id = scenarioStorage.save(scenarioDto);
 
