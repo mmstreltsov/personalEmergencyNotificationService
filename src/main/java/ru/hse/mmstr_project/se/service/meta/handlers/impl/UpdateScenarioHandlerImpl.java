@@ -107,6 +107,7 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         Optional.ofNullable(toDb.getFirstTimeToActivate()).ifPresent(builder::firstTimeToActivateOrigin);
         Optional.ofNullable(toDb.getAllowedDelayAfterPing()).ifPresent(builder::allowedDelayAfterPing);
         Optional.ofNullable(toDb.getTextToPing()).ifPresent(builder::textToPing);
+        Optional.ofNullable(toDb.getOkByHand()).ifPresent(builder::okByHand);
 
         return builder.build();
     }

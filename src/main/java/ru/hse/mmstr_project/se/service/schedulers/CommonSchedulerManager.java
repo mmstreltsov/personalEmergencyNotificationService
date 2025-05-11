@@ -79,7 +79,7 @@ public class CommonSchedulerManager {
     @Transactional
     public void handleLostPart(Collection<ScenarioDto> scenarios) {
         Map<String, ScenarioDto> collect = scenarios.stream()
-                .filter(it -> it.getOkFromAntispam() || it.getOkByHand())
+                .filter(it -> it.getOkFromAntispam() && it.getOkByHand())
                 .collect(Collectors.toMap(
                         it -> it.getUuid().toString(),
                         it -> it,
