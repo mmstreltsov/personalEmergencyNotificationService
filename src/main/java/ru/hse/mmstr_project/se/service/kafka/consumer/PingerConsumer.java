@@ -4,7 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.listener.BatchAcknowledgingMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import ru.hse.mmstr_project.se.client.TelegramBotSender;
+import ru.hse.mmstr_project.se.client.TelegramBotMainSender;
 import ru.hse.mmstr_project.se.kafka.dto.PingerDto;
 
 import java.util.List;
@@ -12,9 +12,9 @@ import java.util.List;
 @Component
 public class PingerConsumer implements BatchAcknowledgingMessageListener<String, Object> {
 
-    private final TelegramBotSender manager;
+    private final TelegramBotMainSender manager;
 
-    public PingerConsumer(TelegramBotSender manager) {
+    public PingerConsumer(TelegramBotMainSender manager) {
         this.manager = manager;
     }
 

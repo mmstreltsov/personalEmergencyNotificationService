@@ -4,7 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.listener.BatchAcknowledgingMessageListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
-import ru.hse.mmstr_project.se.client.TelegramBotSender;
+import ru.hse.mmstr_project.se.client.TelegramBotMainSender;
 import ru.hse.mmstr_project.se.kafka.dto.TgBotRequestDto;
 
 import java.util.List;
@@ -12,9 +12,9 @@ import java.util.List;
 @Component
 public class MetaResponsesConsumer implements BatchAcknowledgingMessageListener<String, Object> {
 
-    private final TelegramBotSender manager;
+    private final TelegramBotMainSender manager;
 
-    public MetaResponsesConsumer(TelegramBotSender manager) {
+    public MetaResponsesConsumer(TelegramBotMainSender manager) {
         this.manager = manager;
     }
 

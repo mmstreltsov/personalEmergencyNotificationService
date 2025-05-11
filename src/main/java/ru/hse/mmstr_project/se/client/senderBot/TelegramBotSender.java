@@ -1,4 +1,4 @@
-package ru.hse.mmstr_project.se.client;
+package ru.hse.mmstr_project.se.client.senderBot;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 public class TelegramBotSender extends DefaultAbsSender {
 
     public TelegramBotSender(
-            @Value("${tg.bot.main.client.token}") String botToken) {
+            @Value("${tg.bot.sender.client.token}") String botToken) {
         super(new DefaultBotOptions(), botToken);
     }
 

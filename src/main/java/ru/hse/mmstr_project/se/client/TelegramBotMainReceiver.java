@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class TelegramBotReceiver extends TelegramLongPollingBot {
+public class TelegramBotMainReceiver extends TelegramLongPollingBot {
 
     private static final String SPACE = " ";
     private static final String ERROR_CASE = "Ваша команда не распознана";
@@ -19,17 +19,17 @@ public class TelegramBotReceiver extends TelegramLongPollingBot {
 
     private final String botUsername;
     private final Map<String, CommandHandler> handlers;
-    private final TelegramBotSender telegramBotSender;
+    private final TelegramBotMainSender telegramBotMainSender;
 
-    public TelegramBotReceiver(
+    public TelegramBotMainReceiver(
             @Value("${tg.bot.main.client.token}") String botToken,
             @Value("${tg.bot.main.client.username}") String botUsername,
             Map<String, CommandHandler> commandHandlers,
-            TelegramBotSender telegramBotSender) {
+            TelegramBotMainSender telegramBotMainSender) {
         super(botToken);
         this.botUsername = botUsername;
         this.handlers = commandHandlers;
-        this.telegramBotSender = telegramBotSender;
+        this.telegramBotMainSender = telegramBotMainSender;
     }
 
     @Override
@@ -55,9 +55,9 @@ public class TelegramBotReceiver extends TelegramLongPollingBot {
                         return cons.handle(args, chatId, update.getMessage());
                     })
                     .orElse(Optional.of(ERROR_CASE))
-                    .ifPresent(response -> telegramBotSender.sendMessage(chatId, response));
+                    .ifPresent(response -> telegramBotMainSender.sendMessage(chatId, response));
         } catch (Exception e) {
-            telegramBotSender.sendMessage(chatId, RUNTIME_ERROR_CASE);
+            telegramBotMainSender.sendMessage(chatId, RUNTIME_ERROR_CASE);
         }
     }
 }
