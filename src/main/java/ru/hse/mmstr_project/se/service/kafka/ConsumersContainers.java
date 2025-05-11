@@ -10,6 +10,7 @@ import org.springframework.kafka.listener.KafkaMessageListenerContainer;
 import ru.hse.mmstr_project.se.kafka.BaseConsumerConfig;
 import ru.hse.mmstr_project.se.service.kafka.consumer.AntispamRequestConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.EmailSenderConsumer;
+import ru.hse.mmstr_project.se.service.kafka.consumer.IncidentConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.MetaRequestConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.MetaResponsesConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.PingerConsumer;
@@ -74,10 +75,18 @@ public class ConsumersContainers {
     }
 
     @Bean
-    public KafkaMessageListenerContainer<String, Object> PingerContainer(
+    public KafkaMessageListenerContainer<String, Object> pingerContainer(
             ConcurrentKafkaListenerContainerFactory<String, Object> factory,
             PingerConsumer consumer,
             @Value("${kafka.topic.name.pinger}") String topic) {
+        return getContainer(factory, consumer, topic, topic);
+    }
+
+    @Bean
+    public KafkaMessageListenerContainer<String, Object> sosButtonContainer(
+            ConcurrentKafkaListenerContainerFactory<String, Object> factory,
+            IncidentConsumer consumer,
+            @Value("${kafka.topic.name.incidents}") String topic) {
         return getContainer(factory, consumer, topic, topic);
     }
 

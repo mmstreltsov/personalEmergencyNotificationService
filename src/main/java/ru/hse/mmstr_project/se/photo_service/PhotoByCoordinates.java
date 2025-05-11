@@ -24,7 +24,7 @@ public class PhotoByCoordinates {
     private final String API_TOKEN;
 
     private static final String BASE_URL = "https://api.mapbox.com/styles/v1/mapbox/streets-v11/static/" +
-            "pin-l-marker+ff0000(%1$s,%2$s)/%1$s,%2$s,17/800x800?access_token=%3$s";
+            "pin-l-marker+ff0000(%1$s,%2$s)/%1$s,%2$s,18/800x800?access_token=%3$s";
     private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat(
             "#.######",
             new DecimalFormatSymbols(Locale.US));
@@ -39,8 +39,8 @@ public class PhotoByCoordinates {
     public Optional<byte[]> getPhotoByCoordinates(double longitude, double latitude) {
         String url = String.format(
                 BASE_URL,
-                DECIMAL_FORMAT.format(latitude),
                 DECIMAL_FORMAT.format(longitude),
+                DECIMAL_FORMAT.format(latitude),
                 API_TOKEN);
 
         HttpRequest request = HttpRequest.newBuilder()

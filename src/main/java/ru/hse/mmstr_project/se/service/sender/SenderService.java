@@ -36,7 +36,7 @@ public class SenderService {
                 .forEach(this::sendOne);
     }
 
-    private void sendOne(SenderRequestDto send) {
+    public void sendOne(SenderRequestDto send) {
         if (SenderWayToNotifyUtil.isTgSender(send.wayToNotify())) {
             senderProducer.sendMessageToTg(send);
         }

@@ -100,6 +100,6 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
     }
 
     private void callback(String response, long chatId) {
-        telegramBotSender.sendMessage(chatId, response);
+        telegramBotSender.sendMessage(chatId, response, null);
     }
 }
