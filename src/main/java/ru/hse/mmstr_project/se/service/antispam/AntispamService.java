@@ -56,7 +56,6 @@ public class AntispamService {
                 .or(() -> Optional.of(scenarioDto.getName())
                         .map(name -> scenarioStorage.findAllByClientIdAndName(request.chatId(), name)));
         if (scenariosO.isEmpty()) {
-            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: Не указан идентификатор сценариев, имя или uuid. Переотправьте запрос на изменение контента", request.chatId()));
             return;
         }
 
@@ -66,7 +65,6 @@ public class AntispamService {
                         .build())
                 .toList();
         if (scenarioDtos.isEmpty()) {
-            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: Не найдены сценарии по указанному идентификатору. Переотправьте запрос на изменение контента", request.chatId()));
             return;
         }
 

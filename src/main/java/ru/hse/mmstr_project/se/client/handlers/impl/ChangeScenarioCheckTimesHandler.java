@@ -48,6 +48,8 @@ public class ChangeScenarioCheckTimesHandler implements CommandHandler {
         List<ScenarioDto> response = new ArrayList<>();
 
         boolean complexData = false;
+        String error = "";
+
         for (int i = 1; ; i++) {
             Optional<String> arg = getArg(args, i);
             if (arg.isEmpty()) {
@@ -66,10 +68,14 @@ public class ChangeScenarioCheckTimesHandler implements CommandHandler {
             } catch (Exception ex) {
                 if (!complexData) {
                     complexData = true;
+                    error = ex.getMessage();
                 } else {
                     return Optional.of(ex.getMessage());
                 }
             }
+        }
+        if (complexData) {
+            return Optional.of(error);
         }
 
         metaRequestService.sendMessage(new MetaRequestDto(

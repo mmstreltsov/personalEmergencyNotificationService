@@ -42,6 +42,21 @@ public final class CreateScenarioDto {
         this.textToPing = textToPing;
     }
 
+    public CreateScenarioDto(ScenarioDto scenarioDto) {
+        this(
+                scenarioDto.getUuid(),
+                scenarioDto.getName(),
+                scenarioDto.getText(),
+                scenarioDto.getClientId(),
+                scenarioDto.getFriendsIds(),
+                scenarioDto.getFirstTimeToActivate(),
+                scenarioDto.getFirstTimeToActivateOrigin(),
+                scenarioDto.getAllowedDelayAfterPing(),
+                scenarioDto.getOkFromAntispam(),
+                scenarioDto.getOkByHand(),
+                scenarioDto.getTextToPing());
+    }
+
     public UUID getUuid() {
         return uuid;
     }

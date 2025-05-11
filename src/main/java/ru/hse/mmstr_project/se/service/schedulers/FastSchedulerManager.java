@@ -35,6 +35,7 @@ public class FastSchedulerManager {
     }
 
     private void handleI(Collection<IncidentMetadataDto> incidentMetadataDtos) {
+        System.out.println("redis: " + incidentMetadataDtos);
         List<IncidentMetadataDto> sendToUsers = filterDuplicates(incidentMetadataDtos);
         senderService.send(sendToUsers);
         repository.removeAll(incidentMetadataDtos.stream().toList());

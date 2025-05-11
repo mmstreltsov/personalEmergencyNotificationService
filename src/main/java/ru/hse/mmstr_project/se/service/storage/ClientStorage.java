@@ -36,6 +36,10 @@ public class ClientStorage {
         return clientRepository.findAllById(ids).stream().map(clientMapper::toDto).toList();
     }
 
+    public List<ClientDto> findAllByChatIds(Collection<Long> ids) {
+        return clientRepository.findAllByChatIdIn(ids).stream().map(clientMapper::toDto).toList();
+    }
+
     public Optional<ClientDto> findByChatId(Long chatId) {
         return clientRepository.findByChatId(chatId).map(clientMapper::toDto);
     }

@@ -32,6 +32,11 @@ public class ScenarioStorage {
     }
 
     @Transactional
+    public void saveAllCreatingDto(Collection<CreateScenarioDto> scenarioDtos) {
+        scenarioRepository.saveAll(scenarioDtos.stream().map(clientMapper::toEntity).toList());
+    }
+
+    @Transactional
     public String save(CreateScenarioDto scenarioDto) {
         return scenarioRepository.save(clientMapper.toEntity(scenarioDto)).getUuid().toString();
     }

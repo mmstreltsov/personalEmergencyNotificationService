@@ -8,9 +8,9 @@ import ru.hse.mmstr_project.se.service.meta.FunctionType;
 import ru.hse.mmstr_project.se.service.meta.MessageType;
 import ru.hse.mmstr_project.se.service.meta.handlers.MetaRequestHandler;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
+import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,11 +29,14 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
     public Optional<String> handle(MetaRequestDto requestDto) {
         List<ScenarioDto> scenarioDtos = Optional.ofNullable(requestDto.scenarioDto()).orElse(List.of());
 
-        return switch (scenarioDtos.size()) {
-            case 0 -> Optional.of("Ничего не делается");
-            case 1 -> handleOne(requestDto, scenarioDtos.getFirst());
-            default -> handleMultiple(requestDto, scenarioDtos);
-        };
+        if (scenarioDtos.isEmpty()) {
+            return Optional.of("Ничего не делается");
+        }
+
+        if (scenarioDtos.size() == 1 && Objects.isNull(scenarioDtos.getFirst().getFirstTimeToActivate())) {
+            return handleOne(requestDto, scenarioDtos.getFirst());
+        }
+        return handleMultipleRows(requestDto, scenarioDtos);
     }
 
     private Optional<String> handleOne(MetaRequestDto requestDto, ScenarioDto scenarioDto) {
@@ -46,40 +49,24 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         return Optional.empty();
     }
 
-    protected Optional<String> handleMultiple(MetaRequestDto requestDto, List<ScenarioDto> scenarioDtos) {
-
-        List<ScenarioDto> scenario = findAllByScenario(scenarioDtos.getFirst(), requestDto.chatId());
-        if (scenario.isEmpty()) {
+    protected Optional<String> handleMultipleRows(MetaRequestDto requestDto, List<ScenarioDto> scenarioDtos) {
+        List<ScenarioDto> scenarios = findAllByScenario(scenarioDtos.getFirst(), requestDto.chatId());
+        if (scenarios.isEmpty()) {
             return Optional.of("Сценарий не найден");
         }
 
-        List<ScenarioDto> dtosFromDb = new ArrayList<>(scenario);
-        List<Long> toDelete = new ArrayList<>();
+        ScenarioDto scenario = scenarios.getFirst();
+        List<CreateScenarioDto> result = scenarioDtos.stream()
+                .map(it -> updating(scenario, it))
+                .map(CreateScenarioDto::new)
+                .toList();
 
-        while (dtosFromDb.size() < scenarioDtos.size()) {
-            dtosFromDb.add(dtosFromDb.getFirst());
-        }
-        if (dtosFromDb.size() > scenarioDtos.size()) {
-            dtosFromDb.stream().map(ScenarioDto::getId).limit(scenarioDtos.size() - dtosFromDb.size()).forEach(toDelete::add);
-        }
-
-        List<ScenarioDto> result = new ArrayList<>(dtosFromDb);
-        for (int i = 0; i < scenarioDtos.size(); i++) {
-            result.add(updating(dtosFromDb.get(i), scenarioDtos.get(i)));
-        }
-        saveAndDelete(result, toDelete);
-
-        if (Objects.nonNull(scenarioDtos.getFirst().getFirstTimeToActivate())) {
-            return Optional.of(ScenarioDto.timesToString(
-                    result.stream().map(ScenarioDto::getFirstTimeToActivate).filter(Objects::nonNull).toList()));
-        }
-
-
+        saveAndDelete(result, scenarios.stream().map(ScenarioDto::getId).toList());
         return Optional.empty();
     }
 
     private List<ScenarioDto> findAllByScenario(ScenarioDto scenarioDto, Long chatId) {
-        if (Objects.nonNull(scenarioDto.getName())) {
+        if (Objects.nonNull(scenarioDto.getName()) && Objects.nonNull(scenarioDto.getUuid())) {
             if (!scenarioStorage.findAllByClientIdAndName(chatId, scenarioDto.getName()).isEmpty()) {
                 throw new RuntimeException("Сценарий с указанным именем уже существует, пропускаю изменение");
             }
@@ -102,11 +89,11 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         return result;
     }
 
-    protected void saveAndDelete(List<ScenarioDto> scenarioDtos, List<Long> toDelete) {
+    protected void saveAndDelete(List<CreateScenarioDto> scenarioDtos, List<Long> toDelete) {
         if (!toDelete.isEmpty()) {
             scenarioStorage.deleteByIds(toDelete);
         }
-        scenarioStorage.saveAll(scenarioDtos);
+        scenarioStorage.saveAllCreatingDto(scenarioDtos);
     }
 
     private ScenarioDto updating(ScenarioDto fromDb, ScenarioDto toDb) {

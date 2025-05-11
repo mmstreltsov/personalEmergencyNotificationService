@@ -64,7 +64,7 @@ public class CreateScenarioHandlerImpl implements MetaRequestHandler {
                 NEVER,
                 NEVER,
                 1,
-                false,
+                true,
                 true,
                 DEFAULT_SCENARIO_PING);
     }

@@ -221,7 +221,7 @@ public class ScenarioDto {
     public String toBeautyString() {
         StringBuilder builder = new StringBuilder();
 
-        builder.append("ID: ").append(id).append('\n');
+        builder.append("ID: ").append(uuid.toString()).append('\n');
 
         builder.append("Название: ")
                 .append(Optional.ofNullable(name).filter(it -> !it.isEmpty()).orElse("Не указано"))
