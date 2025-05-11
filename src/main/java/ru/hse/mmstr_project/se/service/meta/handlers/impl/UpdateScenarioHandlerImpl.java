@@ -25,6 +25,7 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
     }
 
     @Override
+    @Transactional
     public Optional<String> handle(MetaRequestDto requestDto) {
         List<ScenarioDto> scenarioDtos = Optional.ofNullable(requestDto.scenarioDto()).orElse(List.of());
 
@@ -55,8 +56,13 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         return Optional.empty();
     }
 
+    protected Optional<String> handleMultiple(MetaRequestDto requestDto, List<ScenarioDto> scenarioDtos) {
+        if (Objects.nonNull(scenarioDtos.getFirst().getName())) {
+            if (!scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), scenarioDtos.getFirst().getName()).isEmpty()) {
+                return Optional.of("Сценарий с указанным именем уже существует, пропускаю изменение");
+            }
+        }
 
-    private Optional<String> handleMultiple(MetaRequestDto requestDto, List<ScenarioDto> scenarioDtos) {
         Optional<List<ScenarioDto>> scenariosO = Optional.ofNullable(scenarioDtos.getFirst().getUuid())
                 .map(scenarioStorage::findAllByUuid)
                 .or(() -> Optional.of(scenarioDtos.getFirst().getName())
@@ -84,7 +90,6 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         return Optional.empty();
     }
 
-    @Transactional
     protected void saveAndDelete(List<ScenarioDto> scenarioDtos, List<Long> toDelete) {
         if (!toDelete.isEmpty()) {
             scenarioStorage.deleteByIds(toDelete);
