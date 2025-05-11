@@ -29,7 +29,6 @@ public class MetaService {
 
     private void handleOne(MetaRequestDto request) {
         Optional<String> response;
-        Long chatId = request.chatId();
 
         MessageType messageType = new MessageType(request.entityType(), request.functionType());
         try {
@@ -40,6 +39,7 @@ public class MetaService {
             response = Optional.of(e.getMessage());
         }
 
-        response.ifPresent(it -> responser.sendMessage(new TgBotRequestDto(it, chatId)));
+        response.ifPresent(resp -> Optional.ofNullable(request.chatId()).ifPresent(chatId ->
+                responser.sendMessage(new TgBotRequestDto(resp, chatId))));
     }
 }

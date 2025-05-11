@@ -5,5 +5,6 @@ public enum EntityType {
     CLIENT,
     CLIENT_FRIEND,
     ALERT,
+    SUBSCRIPTION,
     ;
 }

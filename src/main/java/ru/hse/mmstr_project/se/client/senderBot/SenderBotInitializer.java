@@ -9,9 +9,9 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
 public class SenderBotInitializer {
-    private final TelegramBotSenderReceiver bot;
+    private final TelegramBotSubscriptionsReceiver bot;
 
-    public SenderBotInitializer(TelegramBotSenderReceiver bot) {
+    public SenderBotInitializer(TelegramBotSubscriptionsReceiver bot) {
         this.bot = bot;
     }
 
