@@ -63,8 +63,19 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
         }
         saveAndDelete(result, toDelete);
 
-        return Optional.of("Сценарию проставлено время срабатывания (в UTC): "
-                + String.join(" ", result.stream().map(it -> it.getFirstTimeToActivate().toString()).toList()));
+        if (Objects.nonNull(scenarioDtos.getFirst().getFirstTimeToActivate())) {
+            StringBuilder response = new StringBuilder("Сценарию проставлено время срабатывания (в UTC):\n")
+                    .append("`")
+                    .append(String.join(" ", result.stream()
+                            .filter(it -> Objects.nonNull(it.getFirstTimeToActivate()))
+                            .map(it -> it.getFirstTimeToActivate().toString())
+                            .toList()))
+                    .append("`");
+            return Optional.of(response.toString());
+        }
+
+
+        return Optional.empty();
     }
 
     private List<ScenarioDto> findAllByScenario(ScenarioDto scenarioDto, Long chatId) {
