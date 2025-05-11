@@ -12,6 +12,7 @@ import ru.hse.mmstr_project.se.service.kafka.consumer.AntispamRequestConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.EmailSenderConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.MetaRequestConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.MetaResponsesConsumer;
+import ru.hse.mmstr_project.se.service.kafka.consumer.PingerConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.SmsSenderConsumer;
 import ru.hse.mmstr_project.se.service.kafka.consumer.TgBotSenderConsumer;
 
@@ -69,6 +70,14 @@ public class ConsumersContainers {
             ConcurrentKafkaListenerContainerFactory<String, Object> factory,
             SmsSenderConsumer consumer,
             @Value("${kafka.topic.name.sender.sms}") String topic) {
+        return getContainer(factory, consumer, topic, topic);
+    }
+
+    @Bean
+    public KafkaMessageListenerContainer<String, Object> PingerContainer(
+            ConcurrentKafkaListenerContainerFactory<String, Object> factory,
+            PingerConsumer consumer,
+            @Value("${kafka.topic.name.pinger}") String topic) {
         return getContainer(factory, consumer, topic, topic);
     }
 

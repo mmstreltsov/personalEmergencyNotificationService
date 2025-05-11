@@ -55,7 +55,6 @@ public class CommonSchedulerManager {
         List<ScenarioDto> processedScenarios = scenarios.stream()
                 .filter(it -> it.getOkFromAntispam() && it.getOkByHand())
                 .toList();
-        System.out.println("погнали: " + processedScenarios);
 
         Set<Long> userIds = processedScenarios.stream().map(ScenarioDto::getClientId).collect(Collectors.toSet());
         Map<Long, ClientDto> idToClient = clientStorage.findAllByChatIds(userIds)
@@ -95,14 +94,12 @@ public class CommonSchedulerManager {
         if (result.isEmpty()) {
             return;
         }
-        System.out.println("после дедупа: " + result);
 
         Set<String> alreadyInRedisToo = redisItemRepository.getEntitiesByIds(result).stream()
                 .map(IncidentMetadataDto::id)
                 .collect(Collectors.toSet());
         result = result.stream().filter(it -> !alreadyInRedisToo.contains(it)).toList();
 
-        System.out.println("итого: " + result);
         commonSchedulersMetrics.incLostItems(result.size());
 
         updateObjectsToNextPing(
