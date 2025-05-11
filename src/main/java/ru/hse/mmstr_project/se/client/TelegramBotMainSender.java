@@ -5,8 +5,12 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -36,5 +40,33 @@ public class TelegramBotMainSender extends DefaultAbsSender {
             text = text.replace(character, "\\" + character);
         }
         return text;
+    }
+
+    public void requestLocationForSosButton(Long chatId) {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("Вы можете поделиться своим местоположением для передачи информации своим контактам.");
+
+        ReplyKeyboardMarkup keyboardMarkup = new ReplyKeyboardMarkup();
+        keyboardMarkup.setResizeKeyboard(true);
+        keyboardMarkup.setOneTimeKeyboard(true);
+
+        List<KeyboardRow> keyboard = new ArrayList<>();
+        KeyboardRow row = new KeyboardRow();
+
+        KeyboardButton locationButton = new KeyboardButton("📍 Отправить местоположение");
+        locationButton.setRequestLocation(true);
+        row.add(locationButton);
+
+        row.add(new KeyboardButton("/no"));
+
+        keyboard.add(row);
+        keyboardMarkup.setKeyboard(keyboard);
+        message.setReplyMarkup(keyboardMarkup);
+
+        try {
+            execute(message);
+        } catch (TelegramApiException ignored) {
+        }
     }
 }

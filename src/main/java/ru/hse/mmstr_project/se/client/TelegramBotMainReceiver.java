@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.hse.mmstr_project.se.client.handlers.CommandHandler;
+import ru.hse.mmstr_project.se.client.handlers.impl.SosButtonHandler;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -19,16 +20,19 @@ public class TelegramBotMainReceiver extends TelegramLongPollingBot {
 
     private final String botUsername;
     private final Map<String, CommandHandler> handlers;
+    private final SosButtonHandler sosButtonHandler;
     private final TelegramBotMainSender telegramBotMainSender;
 
     public TelegramBotMainReceiver(
             @Value("${tg.bot.main.client.token}") String botToken,
             @Value("${tg.bot.main.client.username}") String botUsername,
             Map<String, CommandHandler> commandHandlers,
+            SosButtonHandler sosButtonHandler,
             TelegramBotMainSender telegramBotMainSender) {
         super(botToken);
         this.botUsername = botUsername;
         this.handlers = commandHandlers;
+        this.sosButtonHandler = sosButtonHandler;
         this.telegramBotMainSender = telegramBotMainSender;
     }
 
@@ -39,6 +43,11 @@ public class TelegramBotMainReceiver extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        if (update.getMessage().hasLocation()) {
+            sosButtonHandler.handleWithLocation(update.getMessage().getChatId(), update.getMessage().getLocation());
+            return;
+        }
+
         if (!update.hasMessage() || !update.getMessage().hasText()) {
             return;
         }
@@ -57,6 +66,7 @@ public class TelegramBotMainReceiver extends TelegramLongPollingBot {
                     .orElse(Optional.of(ERROR_CASE))
                     .ifPresent(response -> telegramBotMainSender.sendMessage(chatId, response));
         } catch (Exception e) {
+            System.out.println(e);
             telegramBotMainSender.sendMessage(chatId, RUNTIME_ERROR_CASE);
         }
     }

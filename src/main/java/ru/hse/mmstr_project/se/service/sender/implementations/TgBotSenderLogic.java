@@ -18,7 +18,7 @@ public class TgBotSenderLogic implements CommonSenderLogic {
     @Override
     public boolean sendMessage(SenderRequestDto message) {
         Optional.ofNullable(message.chatId())
-                .ifPresent(it -> sender.sendMessage(it, SenderTextProcessUtil.prompt(message)));
+                .ifPresent(it -> sender.sendMessage(it, SenderTextProcessUtil.prompt(message), message.data()));
         return true;
     }
 }
