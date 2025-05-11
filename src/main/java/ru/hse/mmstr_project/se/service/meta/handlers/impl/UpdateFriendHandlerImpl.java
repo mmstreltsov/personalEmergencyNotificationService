@@ -48,7 +48,7 @@ public class UpdateFriendHandlerImpl implements MetaRequestHandler {
         updating(dtoFromDb.get(), friendDto);
         clientStorage.save(clientDto);
 
-        return Optional.of("Обновлен контакт с айди " + friendDto.getId());
+        return Optional.empty();
     }
 
     private void updating(FriendDto fromDb, FriendDto toDb) {
