@@ -30,7 +30,16 @@ public class ReadScenarioHandlerImpl implements MetaRequestHandler {
 
     @Override
     public Optional<String> handle(MetaRequestDto requestDto) {
-        List<ScenarioDto> scenarios = scenarioStorage.findAllByClientId(requestDto.chatId());
+        List<ScenarioDto> scenarios = Optional.ofNullable(requestDto.scenarioDto())
+                .filter(it -> !it.isEmpty())
+                .map(List::getFirst)
+                .flatMap(s -> Optional.ofNullable(s.getUuid())
+                        .map(scenarioStorage::findAllByUuid)
+                        .filter(it -> !it.isEmpty())
+                        .or(() -> Optional.of(s.getName())
+                                .map(name -> scenarioStorage.findAllByClientIdAndName(requestDto.chatId(), name)))
+                )
+                .orElse(scenarioStorage.findAllByClientId(requestDto.chatId()));
 
         Map<UUID, Set<Instant>> timesToActivate = new HashMap<>();
         Map<UUID, ScenarioDto> collect = scenarios.stream().collect(Collectors.toMap(
