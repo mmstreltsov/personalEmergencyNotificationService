@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
@@ -31,8 +32,8 @@ public class ScenarioStorage {
     }
 
     @Transactional
-    public void save(CreateScenarioDto scenarioDto) {
-        scenarioRepository.save(clientMapper.toEntity(scenarioDto));
+    public String save(CreateScenarioDto scenarioDto) {
+        return scenarioRepository.save(clientMapper.toEntity(scenarioDto)).getUuid().toString();
     }
 
     public Iterator<List<ScenarioDto>> iterateScenariosInBatches(
@@ -48,5 +49,9 @@ public class ScenarioStorage {
 
     public List<ScenarioDto> findAllByClientIdAndName(long id, String name) {
         return scenarioRepository.findAllByClientIdAndNameContaining(id, name).stream().map(clientMapper::toDto).toList();
+    }
+
+    public List<ScenarioDto> findAllByUuid(UUID uuid) {
+        return scenarioRepository.findAllByUuid(uuid).stream().map(clientMapper::toDto).toList();
     }
 }
