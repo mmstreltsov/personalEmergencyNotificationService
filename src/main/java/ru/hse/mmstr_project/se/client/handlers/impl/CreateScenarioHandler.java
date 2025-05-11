@@ -31,7 +31,7 @@ public class CreateScenarioHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                scenarioDto,
+                scenarioDto.stream().toList(),
                 false));
         return Optional.empty();
     }

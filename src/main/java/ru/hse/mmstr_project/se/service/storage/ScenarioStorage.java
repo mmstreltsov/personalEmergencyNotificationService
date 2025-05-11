@@ -36,6 +36,11 @@ public class ScenarioStorage {
         return scenarioRepository.save(clientMapper.toEntity(scenarioDto)).getUuid().toString();
     }
 
+    @Transactional
+    public void deleteByIds(List<Long> ids) {
+        scenarioRepository.deleteAllByIdInBatch(ids);
+    }
+
     public Iterator<List<ScenarioDto>> iterateScenariosInBatches(
             Instant from, Instant to, int batchSize, AtomicBoolean cancelled) {
 

@@ -9,6 +9,7 @@ import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +45,7 @@ public class ChangeScenarioNameHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                Optional.of(scenarioDto),
+                List.of(scenarioDto),
                 false));
         return Optional.empty();
     }

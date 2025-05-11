@@ -57,7 +57,7 @@ public class ChangeContactNotificationMethodsHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.of(friendDto),
-                Optional.empty(),
+                List.of(),
                 false));
         return Optional.empty();
     }

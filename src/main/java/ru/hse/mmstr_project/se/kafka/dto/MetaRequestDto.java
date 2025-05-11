@@ -6,6 +6,7 @@ import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
+import java.util.List;
 import java.util.Optional;
 
 public record MetaRequestDto(
@@ -14,6 +15,6 @@ public record MetaRequestDto(
         Long chatId,
         Optional<ClientDto> clientDto,
         Optional<FriendDto> friendDto,
-        Optional<ScenarioDto> scenarioDto,
+        List<ScenarioDto> scenarioDto,
         boolean isDeletingUpdate) {
 }

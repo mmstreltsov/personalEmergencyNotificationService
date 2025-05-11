@@ -9,6 +9,7 @@ import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
 import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -37,7 +38,7 @@ public class ChangeContactNameHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.of(friendDto),
-                Optional.empty(),
+                List.of(),
                 false));
         return Optional.empty();
     }

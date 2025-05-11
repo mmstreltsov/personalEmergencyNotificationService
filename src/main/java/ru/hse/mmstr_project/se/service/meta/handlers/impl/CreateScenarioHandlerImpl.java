@@ -35,7 +35,10 @@ public class CreateScenarioHandlerImpl implements MetaRequestHandler {
     public Optional<String> handle(MetaRequestDto requestDto) {
 
         CreateScenarioDto scenarioDto = getDefaultCreateScenarioDto(requestDto.chatId());
-        Optional<String> nameO = requestDto.scenarioDto().map(ScenarioDto::getName).filter(it -> !it.isEmpty());
+        Optional<String> nameO = Optional.ofNullable(requestDto.scenarioDto()).filter(it -> !it.isEmpty())
+                .map(List::getFirst)
+                .map(ScenarioDto::getName)
+                .filter(it -> !it.isEmpty());
 
         if (nameO.isPresent()) {
             String name = nameO.get();

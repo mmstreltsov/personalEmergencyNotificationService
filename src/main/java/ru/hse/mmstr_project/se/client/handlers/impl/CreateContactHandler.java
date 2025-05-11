@@ -8,6 +8,7 @@ import ru.hse.mmstr_project.se.service.kafka.producer.MetaRequestService;
 import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -27,7 +28,7 @@ public class CreateContactHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                Optional.empty(),
+                List.of(),
                 false));
         return Optional.empty();
     }
