@@ -38,14 +38,20 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
 
     private Optional<String> handleOne(MetaRequestDto requestDto, ScenarioDto scenarioDto) {
         List<ScenarioDto> scenario = findAllByScenario(scenarioDto, requestDto.chatId());
-        scenarioStorage.saveAll(scenario.stream().map(it -> updating(it, scenarioDto)).toList());
+        if (scenario.isEmpty()) {
+            return Optional.of("Сценарий не найден");
+        }
 
+        scenarioStorage.saveAll(scenario.stream().map(it -> updating(it, scenarioDto)).toList());
         return Optional.empty();
     }
 
     protected Optional<String> handleMultiple(MetaRequestDto requestDto, List<ScenarioDto> scenarioDtos) {
 
         List<ScenarioDto> scenario = findAllByScenario(scenarioDtos.getFirst(), requestDto.chatId());
+        if (scenario.isEmpty()) {
+            return Optional.of("Сценарий не найден");
+        }
 
         List<ScenarioDto> dtosFromDb = new ArrayList<>(scenario);
         List<Long> toDelete = new ArrayList<>();

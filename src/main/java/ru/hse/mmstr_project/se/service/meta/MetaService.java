@@ -37,7 +37,6 @@ public class MetaService {
                     .map(it -> it.handle(request))
                     .orElse(Optional.of("Ошибка, не найден обработчик сообщения"));
         } catch (Exception e) {
-            System.out.println(e);
             response = Optional.of(e.getMessage());
         }
 
