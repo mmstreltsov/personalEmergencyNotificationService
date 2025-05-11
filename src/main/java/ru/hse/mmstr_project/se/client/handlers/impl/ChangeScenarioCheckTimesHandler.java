@@ -46,16 +46,29 @@ public class ChangeScenarioCheckTimesHandler implements CommandHandler {
         ScenarioDto withId = builder.build();
 
         List<ScenarioDto> response = new ArrayList<>();
+
+        boolean complexData = false;
         for (int i = 1; ; i++) {
             Optional<String> arg = getArg(args, i);
             if (arg.isEmpty()) {
                 break;
             }
+            String userInput = arg.get();
+
+            if (complexData) {
+                userInput = String.join(" ", getArg(args, i - 1).orElse(""), userInput);
+            }
+
             try {
-                Instant instant = parseTimestamp(arg.get());
+                Instant instant = parseTimestamp(userInput);
                 response.add(withId.toBuilder().firstTimeToActivate(instant).build());
+                complexData = false;
             } catch (Exception ex) {
-                return Optional.of(ex.getMessage());
+                if (!complexData) {
+                    complexData = true;
+                } else {
+                    return Optional.of(ex.getMessage());
+                }
             }
         }
 
@@ -76,7 +89,7 @@ public class ChangeScenarioCheckTimesHandler implements CommandHandler {
             }
 
             if (userInput.matches("\\d+\\.\\d+")) {
-                return Instant.ofEpochMilli((long)(Double.parseDouble(userInput) * 1000));
+                return Instant.ofEpochMilli((long) (Double.parseDouble(userInput) * 1000));
             }
 
             if (userInput.contains("T")) {
