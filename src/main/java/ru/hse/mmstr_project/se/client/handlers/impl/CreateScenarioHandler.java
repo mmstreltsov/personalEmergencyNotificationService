@@ -9,6 +9,7 @@ import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -31,8 +32,7 @@ public class CreateScenarioHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                scenarioDto.stream().toList(),
-                false));
+                scenarioDto.map(List::of).orElse(List.of())));
         return Optional.empty();
     }
 

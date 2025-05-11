@@ -35,8 +35,7 @@ public class StartHandler implements CommandHandler {
                 chatId,
                 Optional.of(clientDto),
                 Optional.empty(),
-                List.of(),
-                false));
+                List.of()));
         return Optional.empty();
     }
 

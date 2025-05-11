@@ -51,8 +51,7 @@ public class ChangeScenarioPingTextHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                List.of(builder.build()),
-                false));
+                List.of(builder.build())));
         return Optional.empty();
     }
 

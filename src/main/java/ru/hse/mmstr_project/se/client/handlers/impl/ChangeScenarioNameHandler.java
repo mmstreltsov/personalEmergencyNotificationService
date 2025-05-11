@@ -45,8 +45,7 @@ public class ChangeScenarioNameHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                List.of(scenarioDto),
-                false));
+                List.of(scenarioDto)));
         return Optional.empty();
     }
 

@@ -15,6 +15,5 @@ public record MetaRequestDto(
         Long chatId,
         Optional<ClientDto> clientDto,
         Optional<FriendDto> friendDto,
-        List<ScenarioDto> scenarioDto,
-        boolean isDeletingUpdate) {
+        List<ScenarioDto> scenarioDto) {
 }

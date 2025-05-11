@@ -65,8 +65,7 @@ public class ChangeScenarioCheckTimesHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                response,
-                false));
+                response));
         return Optional.empty();
     }
 

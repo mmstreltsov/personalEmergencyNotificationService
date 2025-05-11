@@ -38,8 +38,7 @@ public class ChangeContactNameHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.of(friendDto),
-                List.of(),
-                false));
+                List.of()));
         return Optional.empty();
     }
 

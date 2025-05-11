@@ -28,8 +28,7 @@ public class CreateContactHandler implements CommandHandler {
                 chatId,
                 Optional.empty(),
                 Optional.empty(),
-                List.of(),
-                false));
+                List.of()));
         return Optional.empty();
     }
 
