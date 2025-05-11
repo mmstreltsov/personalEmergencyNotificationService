@@ -70,7 +70,7 @@ public class EmailSenderLogic implements CommonSenderLogic {
         Multipart multipart = new MimeMultipart();
 
         MimeBodyPart textPart = new MimeBodyPart();
-        textPart.setText(request.text());
+        textPart.setText(SenderTextProcessUtil.prompt(request));
         multipart.addBodyPart(textPart);
 
         if (request.data() != null && request.data().length > 0) {
