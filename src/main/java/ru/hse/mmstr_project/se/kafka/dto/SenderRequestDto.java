@@ -9,6 +9,6 @@ public record SenderRequestDto(
         String telegramId,
         List<String> wayToNotify,
         String phoneNumber,
-        Integer chatId,
+        Long chatId,
         String email) {
 }

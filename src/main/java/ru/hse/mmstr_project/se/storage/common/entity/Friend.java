@@ -18,7 +18,7 @@ public class Friend {
     @JsonProperty("telegramId")
     private String telegramId;
     @JsonProperty("chatId")
-    private Integer chatId;
+    private Long chatId;
     @JsonProperty("email")
     private String email;
 
@@ -65,11 +65,11 @@ public class Friend {
         this.telegramId = telegramId;
     }
 
-    public Integer getChatId() {
+    public Long getChatId() {
         return chatId;
     }
 
-    public void setChatId(Integer chatId) {
+    public void setChatId(Long chatId) {
         this.chatId = chatId;
     }
 

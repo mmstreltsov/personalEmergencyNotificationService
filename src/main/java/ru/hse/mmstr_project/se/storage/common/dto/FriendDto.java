@@ -9,7 +9,7 @@ public class FriendDto {
     private List<String> wayToNotify;
     private String phoneNumber;
     private String telegramId;
-    private Integer chatId;
+    private Long chatId;
     private String email;
 
     public FriendDto() {
@@ -21,7 +21,7 @@ public class FriendDto {
             List<String> wayToNotify,
             String phoneNumber,
             String telegramId,
-            Integer chatId,
+            Long chatId,
             String email) {
         this.id = id;
         this.name = name;
@@ -72,11 +72,11 @@ public class FriendDto {
         this.telegramId = telegramId;
     }
 
-    public Integer getChatId() {
+    public Long getChatId() {
         return chatId;
     }
 
-    public void setChatId(Integer chatId) {
+    public void setChatId(Long chatId) {
         this.chatId = chatId;
     }
 
@@ -124,7 +124,7 @@ public class FriendDto {
             return this;
         }
 
-        public Builder chatId(Integer chatId) {
+        public Builder chatId(Long chatId) {
             friendDto.chatId = chatId;
             return this;
         }

@@ -18,7 +18,7 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
 
     private static final String HELP_TEXT = """
             Бот для определения подписки на состояние пользователей.
-                        
+            
             /subscribe {id} -- подписаться на пользователя
             /unsubscribe {id} -- отписаться от пользователя пользователя
             /help -- вывести это сообщение
@@ -81,10 +81,10 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
 
         switch (args[0].toLowerCase()) {
             case "/subscribe":
-                friendDto.setChatId(Math.toIntExact(chatId));
+                friendDto.setChatId(chatId);
                 break;
             case "/unsubscribe":
-                friendDto.setChatId(0);
+                friendDto.setChatId(0L);
                 break;
             default:
                 callback("Неизвестная команда", chatId);
