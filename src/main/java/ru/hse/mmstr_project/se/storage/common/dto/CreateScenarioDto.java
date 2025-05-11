@@ -5,17 +5,17 @@ import java.util.List;
 import java.util.UUID;
 
 public final class CreateScenarioDto {
-    private final UUID uuid;
-    private final String name;
-    private final String text;
-    private final Long clientId;
-    private final List<Long> friendsIds;
-    private final Instant firstTimeToActivate;
-    private final Instant firstTimeToActivateOrigin;
-    private final Integer allowedDelayAfterPing;
-    private final Boolean okFromAntispam;
-    private final Boolean okByHand;
-    private final String textToPing;
+    private UUID uuid;
+    private String name;
+    private String text;
+    private Long clientId;
+    private List<Long> friendsIds;
+    private Instant firstTimeToActivate;
+    private Instant firstTimeToActivateOrigin;
+    private Integer allowedDelayAfterPing;
+    private Boolean okFromAntispam;
+    private Boolean okByHand;
+    private String textToPing;
 
     public CreateScenarioDto(
             UUID uuid,
@@ -40,6 +40,21 @@ public final class CreateScenarioDto {
         this.okFromAntispam = okFromAntispam;
         this.okByHand = okByHand;
         this.textToPing = textToPing;
+    }
+
+    public CreateScenarioDto(ScenarioDto scenarioDto) {
+        this(
+                scenarioDto.getUuid(),
+                scenarioDto.getName(),
+                scenarioDto.getText(),
+                scenarioDto.getClientId(),
+                scenarioDto.getFriendsIds(),
+                scenarioDto.getFirstTimeToActivate(),
+                scenarioDto.getFirstTimeToActivateOrigin(),
+                scenarioDto.getAllowedDelayAfterPing(),
+                scenarioDto.getOkFromAntispam(),
+                scenarioDto.getOkByHand(),
+                scenarioDto.getTextToPing());
     }
 
     public UUID getUuid() {
@@ -84,5 +99,49 @@ public final class CreateScenarioDto {
 
     public String getTextToPing() {
         return textToPing;
+    }
+
+    public void setUuid(UUID uuid) {
+        this.uuid = uuid;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public void setClientId(Long clientId) {
+        this.clientId = clientId;
+    }
+
+    public void setFriendsIds(List<Long> friendsIds) {
+        this.friendsIds = friendsIds;
+    }
+
+    public void setFirstTimeToActivate(Instant firstTimeToActivate) {
+        this.firstTimeToActivate = firstTimeToActivate;
+    }
+
+    public void setFirstTimeToActivateOrigin(Instant firstTimeToActivateOrigin) {
+        this.firstTimeToActivateOrigin = firstTimeToActivateOrigin;
+    }
+
+    public void setAllowedDelayAfterPing(Integer allowedDelayAfterPing) {
+        this.allowedDelayAfterPing = allowedDelayAfterPing;
+    }
+
+    public void setOkFromAntispam(Boolean okFromAntispam) {
+        this.okFromAntispam = okFromAntispam;
+    }
+
+    public void setOkByHand(Boolean okByHand) {
+        this.okByHand = okByHand;
+    }
+
+    public void setTextToPing(String textToPing) {
+        this.textToPing = textToPing;
     }
 }

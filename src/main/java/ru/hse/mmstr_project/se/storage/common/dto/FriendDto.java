@@ -142,7 +142,9 @@ public class FriendDto {
     public String toBeautyString() {
         StringBuilder builder = new StringBuilder();
         builder.append("ID: ").append(id).append('\n');
-        builder.append("Контакт: ").append(Optional.ofNullable(name).orElse("Имя не указано")).append('\n');
+        builder.append("Контакт: ")
+                .append(Optional.ofNullable(name).filter(it -> !it.isEmpty()).orElse("Имя не указано"))
+                .append('\n');
 
         Optional.ofNullable(wayToNotify).filter(it -> !it.isEmpty()).ifPresent(it ->
                 builder.append("Предпочитаемые способы связи: ").append(String.join(", ", it)).append('\n'));

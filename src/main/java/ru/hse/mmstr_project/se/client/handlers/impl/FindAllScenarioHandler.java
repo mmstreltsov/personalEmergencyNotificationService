@@ -7,43 +7,33 @@ import ru.hse.mmstr_project.se.kafka.dto.MetaRequestDto;
 import ru.hse.mmstr_project.se.service.kafka.producer.MetaRequestService;
 import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
-import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 
 import java.util.List;
 import java.util.Optional;
 
 @Component
-public class ChangeContactNameHandler implements CommandHandler {
+public class FindAllScenarioHandler implements CommandHandler {
 
     private final MetaRequestService metaRequestService;
 
-    public ChangeContactNameHandler(MetaRequestService metaRequestService) {
+    public FindAllScenarioHandler(MetaRequestService metaRequestService) {
         this.metaRequestService = metaRequestService;
     }
 
     @Override
     public Optional<String> handle(String args, Long chatId, Message message) {
-        Optional<String> id = getArg(args, 0);
-        if (id.isEmpty()) {
-            return Optional.of("Предоставьте айди контакта");
-        }
-
-        FriendDto friendDto = new FriendDto();
-        friendDto.setId(Integer.parseInt(id.get().trim()));
-        friendDto.setName(getArg(args, 1).orElse(""));
-
         metaRequestService.sendMessage(new MetaRequestDto(
-                FunctionType.UPDATE,
-                EntityType.CLIENT_FRIEND,
+                FunctionType.READ,
+                EntityType.SCENARIO,
                 chatId,
                 Optional.empty(),
-                Optional.of(friendDto),
+                Optional.empty(),
                 List.of()));
         return Optional.empty();
     }
 
     @Override
     public String getCommand() {
-        return "/set_name_for_contact";
+        return "/list_scenarios";
     }
 }

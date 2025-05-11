@@ -10,6 +10,7 @@ import ru.hse.mmstr_project.se.storage.common.entity.Scenario;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
@@ -20,5 +21,9 @@ public interface ScenarioRepository extends JpaRepository<Scenario, Long> {
             @Param("endTime") Instant endTime,
             Pageable pageable);
 
+    List<Scenario> findAllByClientId(Long clientId);
+
     List<Scenario> findAllByClientIdAndNameContaining(Long clientId, String name);
+
+    List<Scenario> findAllByUuid(UUID uuid);
 }

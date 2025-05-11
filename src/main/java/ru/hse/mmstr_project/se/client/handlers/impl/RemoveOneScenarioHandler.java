@@ -7,43 +7,49 @@ import ru.hse.mmstr_project.se.kafka.dto.MetaRequestDto;
 import ru.hse.mmstr_project.se.service.kafka.producer.MetaRequestService;
 import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
-import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
+import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Component
-public class ChangeContactNameHandler implements CommandHandler {
+public class RemoveOneScenarioHandler implements CommandHandler {
 
     private final MetaRequestService metaRequestService;
 
-    public ChangeContactNameHandler(MetaRequestService metaRequestService) {
+    public RemoveOneScenarioHandler(MetaRequestService metaRequestService) {
         this.metaRequestService = metaRequestService;
     }
 
     @Override
     public Optional<String> handle(String args, Long chatId, Message message) {
-        Optional<String> id = getArg(args, 0);
-        if (id.isEmpty()) {
-            return Optional.of("Предоставьте айди контакта");
+        Optional<String> idO = getArg(args, 0);
+        if (idO.isEmpty()) {
+            return Optional.of("Предоставьте айди сценария");
+        }
+        String id = idO.get();
+
+        ScenarioDto.Builder builder = ScenarioDto.builder();
+        try {
+            UUID uuid = UUID.fromString(id);
+            builder.uuid(uuid);
+        } catch (Exception ignored) {
+            builder.name(id);
         }
 
-        FriendDto friendDto = new FriendDto();
-        friendDto.setId(Integer.parseInt(id.get().trim()));
-        friendDto.setName(getArg(args, 1).orElse(""));
-
         metaRequestService.sendMessage(new MetaRequestDto(
-                FunctionType.UPDATE,
-                EntityType.CLIENT_FRIEND,
+                FunctionType.DELETE,
+                EntityType.SCENARIO,
                 chatId,
                 Optional.empty(),
-                Optional.of(friendDto),
-                List.of()));
+                Optional.empty(),
+                List.of(builder.build())));
         return Optional.empty();
     }
 
     @Override
     public String getCommand() {
-        return "/set_name_for_contact";
+        return "/remove_scenario";
     }
 }

@@ -39,29 +39,38 @@ public class AntispamService {
         if (!request.entityType().equals(EntityType.SCENARIO) && !request.functionType().equals(FunctionType.UPDATE)) {
             return;
         }
-        Optional<String> text = request.scenarioDto().map(ScenarioDto::getText);
+        List<ScenarioDto> scenarioDtoO = Optional.ofNullable(request.scenarioDto()).orElse(List.of());
+        if (scenarioDtoO.isEmpty()) {
+            return;
+        }
+        ScenarioDto scenarioDto = scenarioDtoO.getFirst();
+
+        Optional<String> text = Optional.ofNullable(scenarioDto.getText());
         if (text.isEmpty()) {
             return;
         }
+        boolean ok = !spamDetectorManager.isSpam(text.get());
 
-        Optional<String> name = request.scenarioDto().map(ScenarioDto::getName);
-        if (name.isEmpty()) {
-            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: Не указан идентификатор сценариев, имя. Переотправьте запрос с указанием имени сценария", request.chatId()));
+        Optional<List<ScenarioDto>> scenariosO = Optional.ofNullable(scenarioDto.getUuid())
+                .map(scenarioStorage::findAllByUuid)
+                .or(() -> Optional.of(scenarioDto.getName())
+                        .map(name -> scenarioStorage.findAllByClientIdAndName(request.chatId(), name)));
+        if (scenariosO.isEmpty()) {
             return;
         }
 
-        boolean ok = !spamDetectorManager.isSpam(text.get());
-        List<ScenarioDto> clientScenarios = scenarioStorage.findAllByClientIdAndName(request.chatId(), name.get());
-
-        List<ScenarioDto> scenarioDtos = clientScenarios.stream()
+        List<ScenarioDto> scenarioDtos = scenariosO.get().stream()
                 .map(it -> it.toBuilder()
                         .okFromAntispam(ok)
                         .build())
                 .toList();
-        scenarioStorage.saveAll(scenarioDtos);
+        if (scenarioDtos.isEmpty()) {
+            return;
+        }
 
+        scenarioStorage.saveAll(scenarioDtos);
         if (!ok) {
-            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: ты не пройдешь {" + name.get() + "}", request.chatId()));
+            responser.sendMessage(new TgBotRequestDto("Антиспам сервис: ты не пройдешь {" + scenarioDtos.getFirst().getUuid() + "}", request.chatId()));
         }
     }
 }

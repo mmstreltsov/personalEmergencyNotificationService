@@ -24,7 +24,7 @@ public record IncidentMetadataDto(
                 scenarioDto.getUuid().toString(),
                 scenarioDto.getName(),
                 scenarioDto.getText(),
-                scenarioDto.getFirstTimeToActivate().toEpochMilli(),
+                scenarioDto.getFirstTimeToActivate().toEpochMilli() + scenarioDto.getAllowedDelayAfterPing() * 60_000,
                 scenarioDto.getFirstTimeToActivateOrigin().toEpochMilli(),
                 scenarioDto.getAllowedDelayAfterPing(),
                 scenarioDto.getTextToPing(),

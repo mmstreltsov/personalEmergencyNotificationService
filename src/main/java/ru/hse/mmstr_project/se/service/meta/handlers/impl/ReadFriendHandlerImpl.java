@@ -31,6 +31,11 @@ public class ReadFriendHandlerImpl implements MetaRequestHandler {
         ClientDto clientDto = dto.get();
         clientDto.getListOfFriends().forEach(it -> response.append(it.toBeautyString()).append("\n\n"));
 
+        response.append("\n").append("Список айди всех ваших контактов:\n")
+                .append("`")
+                .append(String.join(" ", clientDto.getListOfFriends().stream().map(it -> it.getId().toString()).toList()))
+                .append("`");
+
         return Optional.of(response.toString());
     }
 

@@ -53,14 +53,14 @@ public class CommonSchedulerManager {
 
     private void handleI(Collection<ScenarioDto> scenarios) {
         List<ScenarioDto> processedScenarios = scenarios.stream()
-                .filter(it -> it.getOkFromAntispam() || it.getOkByHand())
+                .filter(it -> it.getOkFromAntispam() && it.getOkByHand())
                 .toList();
 
         Set<Long> userIds = processedScenarios.stream().map(ScenarioDto::getClientId).collect(Collectors.toSet());
-        Map<Long, ClientDto> idToClient = clientStorage.findAllByIds(userIds)
+        Map<Long, ClientDto> idToClient = clientStorage.findAllByChatIds(userIds)
                 .stream()
                 .collect(Collectors.toMap(
-                        ClientDto::getId,
+                        ClientDto::getChatId,
                         Function.identity(),
                         (f, s) -> s));
 
@@ -79,7 +79,7 @@ public class CommonSchedulerManager {
     @Transactional
     public void handleLostPart(Collection<ScenarioDto> scenarios) {
         Map<String, ScenarioDto> collect = scenarios.stream()
-                .filter(it -> it.getOkFromAntispam() || it.getOkByHand())
+                .filter(it -> it.getOkFromAntispam() && it.getOkByHand())
                 .collect(Collectors.toMap(
                         it -> it.getUuid().toString(),
                         it -> it,
@@ -99,6 +99,7 @@ public class CommonSchedulerManager {
                 .map(IncidentMetadataDto::id)
                 .collect(Collectors.toSet());
         result = result.stream().filter(it -> !alreadyInRedisToo.contains(it)).toList();
+
         commonSchedulersMetrics.incLostItems(result.size());
 
         updateObjectsToNextPing(
