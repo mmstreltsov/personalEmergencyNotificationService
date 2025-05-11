@@ -113,6 +113,22 @@ public class RedisItemRepository {
         removeEmptyIndexes(indexes);
     }
 
+    public void removeFromIndex(String key) {
+        List<String> indexes = fetchCurrentIndexes();
+
+        redisTemplate.executePipelined(new SessionCallback<>() {
+            @Override
+            @SuppressWarnings("unchecked")
+            public Object execute(RedisOperations operations) {
+                redisTemplate.expire(key, 3, TimeUnit.MINUTES);
+
+                Object[] keysArray = {key};
+                indexes.forEach(index -> redisTemplate.opsForZSet().remove(index, keysArray));
+                return null;
+            }
+        });
+    }
+
     private void removeEmptyIndexes(List<String> keys) {
         for (String key : keys) {
             Long size = redisTemplate.opsForZSet().size(key);

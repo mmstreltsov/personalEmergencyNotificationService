@@ -12,6 +12,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -42,6 +43,11 @@ public class ScenarioStorage {
     }
 
     @Transactional
+    public String save(ScenarioDto scenarioDto) {
+        return scenarioRepository.save(clientMapper.toEntity(scenarioDto)).getUuid().toString();
+    }
+
+    @Transactional
     public void deleteByIds(List<Long> ids) {
         scenarioRepository.deleteAllByIdInBatch(ids);
     }
@@ -67,5 +73,13 @@ public class ScenarioStorage {
 
     public List<ScenarioDto> findAllByUuid(UUID uuid) {
         return scenarioRepository.findAllByUuid(uuid).stream().map(clientMapper::toDto).toList();
+    }
+
+    public Optional<ScenarioDto> findLastAlertByChatId(long id) {
+        return scenarioRepository.findFirstByClientIdAndFirstTimeToActivateLessThanOrderByFirstTimeToActivateDesc(id, Instant.now()).map(clientMapper::toDto);
+    }
+
+    public Optional<ScenarioDto> findNextAlertByChatId(long id) {
+        return scenarioRepository.findFirstByClientIdAndFirstTimeToActivateGreaterThanOrderByFirstTimeToActivateAsc(id, Instant.now()).map(clientMapper::toDto);
     }
 }

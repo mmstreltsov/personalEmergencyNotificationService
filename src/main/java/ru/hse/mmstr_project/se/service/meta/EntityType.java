@@ -4,5 +4,6 @@ public enum EntityType {
     SCENARIO,
     CLIENT,
     CLIENT_FRIEND,
+    ALERT,
     ;
 }
