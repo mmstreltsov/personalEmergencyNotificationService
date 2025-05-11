@@ -18,7 +18,7 @@ import java.util.UUID;
 @Component
 public class CreateScenarioHandlerImpl implements MetaRequestHandler {
 
-    private static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
+    public static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
     public static final String DEFAULT_SCENARIO_NAME = "Scenario-" + Instant.now().getNano();
     public static final String DEFAULT_SCENARIO_TEXT = "Я в беде";

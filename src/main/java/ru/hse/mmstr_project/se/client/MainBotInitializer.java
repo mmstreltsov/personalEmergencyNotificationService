@@ -1,6 +1,5 @@
 package ru.hse.mmstr_project.se.client;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -9,11 +8,10 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
 @Component
-public class BotInitializer {
-    private final TelegramBotReceiver bot;
+public class MainBotInitializer {
+    private final TelegramBotMainReceiver bot;
 
-    @Autowired
-    public BotInitializer(TelegramBotReceiver bot) {
+    public MainBotInitializer(TelegramBotMainReceiver bot) {
         this.bot = bot;
     }
 

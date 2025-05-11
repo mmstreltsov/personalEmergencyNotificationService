@@ -54,7 +54,7 @@ public class SmsSenderLogic implements CommonSenderLogic {
         String body = objectMapper.writeValueAsString(new Body(
                 sourceNumber,
                 destinationNumber,
-                prompt(message.text(), message.username(), message.telegramId())));
+                SenderTextProcessUtil.prompt(message)));
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL))
@@ -66,14 +66,6 @@ public class SmsSenderLogic implements CommonSenderLogic {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
         return response.statusCode() == 200;
-    }
-
-    private static String prompt(String text, String username, String telegramId) {
-        return String.format(
-                "Привет, Ваш друг %s (telegramId %s) передает: %s. Свяжитесь с ним",
-                username,
-                telegramId,
-                text);
     }
 
     private record Body(

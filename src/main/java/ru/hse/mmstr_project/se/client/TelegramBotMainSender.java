@@ -7,10 +7,12 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-@Component
-public class TelegramBotSender extends DefaultAbsSender {
+import java.util.List;
 
-    public TelegramBotSender(
+@Component
+public class TelegramBotMainSender extends DefaultAbsSender {
+
+    public TelegramBotMainSender(
             @Value("${tg.bot.main.client.token}") String botToken) {
         super(new DefaultBotOptions(), botToken);
     }
@@ -18,12 +20,21 @@ public class TelegramBotSender extends DefaultAbsSender {
     public void sendMessage(Long chatId, String text) {
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
-        message.setText(text);
+        message.setText(forMarkdown(text));
         message.setParseMode("MarkDown");
 
         try {
             execute(message);
         } catch (TelegramApiException ignored) {
         }
+    }
+
+    private String forMarkdown(String text) {
+        List<String> specialChars = List.of("_", "*", "[");
+
+        for (String character : specialChars) {
+            text = text.replace(character, "\\" + character);
+        }
+        return text;
     }
 }
