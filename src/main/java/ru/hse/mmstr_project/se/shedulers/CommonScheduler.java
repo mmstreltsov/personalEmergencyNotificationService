@@ -22,7 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class CommonScheduler extends AbstractScheduler {
 
     private static final long SCHEDULER_ID = 1;
-    private static final int SECONDS_TO_EXTRA_SCAN = 10;
+    private static final int SECONDS_TO_EXTRA_SCAN = 0;
     private static final int WAIT_IF_NEEDED_MS = 10_000;
     private static final int BATCH_SIZE = 512;
     private static final int BATCH_SIZE_FOR_CHECKER = 1024;
@@ -93,10 +93,8 @@ public class CommonScheduler extends AbstractScheduler {
     @Scheduled(fixedDelayString = "${app.scheduler.common-database-scan-checker.fixed-delay}")
     @Transactional
     public void checker() {
-        SchedulersStateDto stateDto = getLastProcessedTime();
-
-        Instant from = stateDto.fetchTime().minus(100, ChronoUnit.SECONDS);
-        Instant to = stateDto.fetchTime().minus(40, ChronoUnit.SECONDS);
+        Instant from = Instant.now().minus(100, ChronoUnit.SECONDS);
+        Instant to = Instant.now().minus(40, ChronoUnit.SECONDS);
 
         Iterator<List<ScenarioDto>> batchIterator = scenarioStorage.iterateScenariosInBatches(
                 from,

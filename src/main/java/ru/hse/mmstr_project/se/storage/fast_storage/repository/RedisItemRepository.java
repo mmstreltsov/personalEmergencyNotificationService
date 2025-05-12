@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public class RedisItemRepository {
 
     private static final String KEY_PREFIX = "incident:";
-    private static final String CONFIRM_KEY_PREFIX = "incident:";
+    private static final String CONFIRM_KEY_PREFIX = "confirm:";
     private static final String TIME_SORTED_SET = "incident:time-index:";
     private static final String DEDUP_SET = "dedup:set:";
     private static final String TEMP_CHECK = "temp:check:";

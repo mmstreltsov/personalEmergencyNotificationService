@@ -43,12 +43,14 @@ public class TelegramBotMainReceiver extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        if (!update.hasMessage()) {
+            return;
+        }
         if (update.getMessage().hasLocation()) {
             sosButtonHandler.handleWithLocation(update.getMessage().getChatId(), update.getMessage().getLocation());
             return;
         }
-
-        if (!update.hasMessage() || !update.getMessage().hasText()) {
+        if (!update.getMessage().hasText()) {
             return;
         }
 

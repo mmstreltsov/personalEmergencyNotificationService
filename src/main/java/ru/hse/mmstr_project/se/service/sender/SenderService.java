@@ -23,7 +23,7 @@ public class SenderService {
                         .filter(friend -> new HashSet<>(request.friendIds()).contains((long) friend.id()))
                         .map(friend -> new SenderRequestDto(
                                 request.text(),
-                                true,
+                                useTextWrapper,
                                 null,
                                 request.username(),
                                 request.telegramId(),

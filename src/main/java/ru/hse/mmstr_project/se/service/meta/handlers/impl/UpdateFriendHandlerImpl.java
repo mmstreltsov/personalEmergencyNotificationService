@@ -68,17 +68,29 @@ public class UpdateFriendHandlerImpl implements MetaRequestHandler {
 
         Optional.ofNullable(toDb.getName()).ifPresent(fromDb::setName);
         Optional.ofNullable(toDb.getEmail()).ifPresent(it -> {
-            wayToNotify.add("email");
+            if (it.isEmpty()) {
+                wayToNotify.remove("email");
+            } else {
+                wayToNotify.add("email");
+            }
             fromDb.setWayToNotify(wayToNotify.stream().toList());
             fromDb.setEmail(it);
         });
         Optional.ofNullable(toDb.getTelegramId()).ifPresent(it -> {
-            wayToNotify.add("tg");
+            if (it.isEmpty()) {
+                wayToNotify.remove("tg");
+            } else {
+                wayToNotify.add("tg");
+            }
             fromDb.setWayToNotify(wayToNotify.stream().toList());
             fromDb.setTelegramId(it);
         });
         Optional.ofNullable(toDb.getPhoneNumber()).ifPresent(it -> {
-            wayToNotify.add("sms");
+            if (it.isEmpty()) {
+                wayToNotify.remove("sms");
+            } else {
+                wayToNotify.add("sms");
+            }
             fromDb.setWayToNotify(wayToNotify.stream().toList());
             fromDb.setPhoneNumber(it);
         });
