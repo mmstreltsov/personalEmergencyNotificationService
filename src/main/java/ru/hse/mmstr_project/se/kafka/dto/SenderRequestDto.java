@@ -4,6 +4,7 @@ import java.util.List;
 
 public record SenderRequestDto(
         String text,
+        boolean useTextWrapper,
         byte[] data,
         String username,
         String telegramId,

@@ -75,6 +75,7 @@ public class IncidentService {
         clientDto.getListOfFriends().stream().map(
                 friend -> new SenderRequestDto(
                         helpText,
+                        false,
                         photo,
                         clientDto.getName(),
                         clientDto.getTelegramId(),

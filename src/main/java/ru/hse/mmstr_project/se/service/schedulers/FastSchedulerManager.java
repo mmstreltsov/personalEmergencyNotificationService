@@ -7,8 +7,10 @@ import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 import ru.hse.mmstr_project.se.storage.fast_storage.repository.RedisItemRepository;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,12 +37,12 @@ public class FastSchedulerManager {
     }
 
     private void handleI(Collection<IncidentMetadataDto> incidentMetadataDtos) {
-        List<IncidentMetadataDto> sendToUsers = filterDuplicates(incidentMetadataDtos);
-        senderService.send(sendToUsers);
+        List<IncidentMetadataDto> sendToUsers = filterDuplicatesAndAlreadyConfirmed(incidentMetadataDtos);
+        senderService.send(sendToUsers, true);
         repository.removeAll(incidentMetadataDtos.stream().toList());
     }
 
-    private List<IncidentMetadataDto> filterDuplicates(Collection<IncidentMetadataDto> incidentMetadataDtos) {
+    private List<IncidentMetadataDto> filterDuplicatesAndAlreadyConfirmed(Collection<IncidentMetadataDto> incidentMetadataDtos) {
         Map<String, IncidentMetadataDto> collect = incidentMetadataDtos.stream()
                 .collect(Collectors.toMap(IncidentMetadataDto::id, Function.identity(), (f, s) -> s));
 
@@ -49,6 +51,9 @@ public class FastSchedulerManager {
                 .toList();
         setProcessedLikeDuplicates(result);
         fastSchedulersMetrics.incDuplicatesFiltered(collect.keySet().size() - result.size());
+
+        Set<String> alreadyConfirmed = new HashSet<>(repository.getConfirmKeys(result));
+        result = result.stream().filter(it -> !alreadyConfirmed.contains(it)).toList();
 
         return result.stream().map(collect::get).toList();
     }

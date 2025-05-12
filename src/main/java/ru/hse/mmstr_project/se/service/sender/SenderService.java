@@ -7,7 +7,6 @@ import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 public class SenderService {
@@ -18,12 +17,13 @@ public class SenderService {
         this.senderProducer = senderProducer;
     }
 
-    public void send(List<IncidentMetadataDto> requests) {
+    public void send(List<IncidentMetadataDto> requests, boolean useTextWrapper) {
         requests.stream()
-                .flatMap(request -> Optional.ofNullable(request.listOfFriends()).orElse(List.of()).stream()
+                .flatMap(request -> request.listOfFriends().stream()
                         .filter(friend -> new HashSet<>(request.friendIds()).contains((long) friend.id()))
                         .map(friend -> new SenderRequestDto(
                                 request.text(),
+                                true,
                                 null,
                                 request.username(),
                                 request.telegramId(),

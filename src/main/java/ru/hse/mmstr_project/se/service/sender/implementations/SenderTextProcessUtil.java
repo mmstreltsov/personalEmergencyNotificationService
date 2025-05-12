@@ -5,6 +5,9 @@ import ru.hse.mmstr_project.se.kafka.dto.SenderRequestDto;
 public class SenderTextProcessUtil {
 
     public static String prompt(SenderRequestDto requestDto) {
+        if (!requestDto.useTextWrapper()) {
+            return requestDto.text();
+        }
         return prompt(requestDto.text(), requestDto.username(), requestDto.telegramId());
     }
 

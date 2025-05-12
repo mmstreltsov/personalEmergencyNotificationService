@@ -16,6 +16,7 @@ import ru.hse.mmstr_project.se.storage.fast_storage.repository.RedisItemReposito
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,11 +101,14 @@ public class CommonSchedulerManager {
                 .collect(Collectors.toSet());
         result = result.stream().filter(it -> !alreadyInRedisToo.contains(it)).toList();
 
+        Set<String> alreadyConfirmed = new HashSet<>(redisItemRepository.getConfirmKeys(result));
+        result = result.stream().filter(it -> !alreadyConfirmed.contains(it)).toList();
+
         commonSchedulersMetrics.incLostItems(result.size());
 
         updateObjectsToNextPing(
                 result.stream().map(collect::get).toList(),
-                Instant.now().plus(31, ChronoUnit.SECONDS));
+                Instant.now().plus(33, ChronoUnit.SECONDS));
     }
 
     private void updateObjectsToNextPing(List<ScenarioDto> scenarios, Instant minimalValue) {

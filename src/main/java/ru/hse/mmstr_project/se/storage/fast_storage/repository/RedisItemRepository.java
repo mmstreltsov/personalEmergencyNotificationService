@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 public class RedisItemRepository {
 
     private static final String KEY_PREFIX = "incident:";
+    private static final String CONFIRM_KEY_PREFIX = "incident:";
     private static final String TIME_SORTED_SET = "incident:time-index:";
     private static final String DEDUP_SET = "dedup:set:";
     private static final String TEMP_CHECK = "temp:check:";
@@ -83,8 +84,17 @@ public class RedisItemRepository {
         });
     }
 
-    public void save(IncidentMetadataDto entity) {
-        saveAll(Collections.singletonList(entity));
+    public void saveConfirm(String key) {
+        redisTemplate.opsForValue().set(CONFIRM_KEY_PREFIX + key, key, 3, TimeUnit.MINUTES);
+    }
+
+    public List<String> getConfirmKeys(List<String> key) {
+        List<String> list = key.stream().map(k -> CONFIRM_KEY_PREFIX + k).toList();
+        return redisTemplate.opsForValue().multiGet(list)
+                .stream()
+                .filter(Objects::nonNull)
+                .map(it -> (String) it)
+                .toList();
     }
 
     public void removeAll(List<IncidentMetadataDto> entities) {
@@ -113,14 +123,14 @@ public class RedisItemRepository {
         removeEmptyIndexes(indexes);
     }
 
-    public void removeFromIndex(String key) {
+    public void remove(String key) {
         List<String> indexes = fetchCurrentIndexes();
 
         redisTemplate.executePipelined(new SessionCallback<>() {
             @Override
             @SuppressWarnings("unchecked")
             public Object execute(RedisOperations operations) {
-                redisTemplate.expire(key, 3, TimeUnit.MINUTES);
+                operations.delete(key);
 
                 Object[] keysArray = {key};
                 indexes.forEach(index -> redisTemplate.opsForZSet().remove(index, keysArray));
@@ -196,6 +206,15 @@ public class RedisItemRepository {
         String setKey = DEDUP_SET + System.currentTimeMillis();
         redisTemplate.opsForSet().add(setKey, ids.toArray(new String[0]));
         redisTemplate.expire(setKey, ttlSeconds, TimeUnit.SECONDS);
+    }
+
+    public boolean isInDuplicates(String id) {
+        for (String setKey : redisTemplate.keys(DEDUP_SET + "*")) {
+            if (redisTemplate.opsForSet().isMember(setKey, id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<String> filterDuplicates(Collection<String> ids) {

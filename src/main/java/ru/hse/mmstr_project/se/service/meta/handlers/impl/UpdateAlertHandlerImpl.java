@@ -6,8 +6,11 @@ import ru.hse.mmstr_project.se.service.meta.EntityType;
 import ru.hse.mmstr_project.se.service.meta.FunctionType;
 import ru.hse.mmstr_project.se.service.meta.MessageType;
 import ru.hse.mmstr_project.se.service.meta.handlers.MetaRequestHandler;
+import ru.hse.mmstr_project.se.service.sender.SenderService;
+import ru.hse.mmstr_project.se.service.storage.ClientStorage;
 import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
+import ru.hse.mmstr_project.se.storage.fast_storage.dto.IncidentMetadataDto;
 import ru.hse.mmstr_project.se.storage.fast_storage.repository.RedisItemRepository;
 
 import java.time.temporal.ChronoUnit;
@@ -17,26 +20,41 @@ import java.util.Optional;
 @Component
 public class UpdateAlertHandlerImpl implements MetaRequestHandler {
 
+    private static final String TEXT_FOR_LATE_OK = "Ложная тревога, Ваш друг %s прислал подтверждение что все хорошо.";
+
     private final ScenarioStorage scenarioStorage;
+    private final ClientStorage clientStorage;
     private final RedisItemRepository repository;
+    private final SenderService senderService;
 
     public UpdateAlertHandlerImpl(
             ScenarioStorage scenarioStorage,
-            RedisItemRepository repository) {
+            ClientStorage clientStorage,
+            RedisItemRepository repository,
+            SenderService senderService) {
         this.scenarioStorage = scenarioStorage;
+        this.clientStorage = clientStorage;
         this.repository = repository;
+        this.senderService = senderService;
     }
 
     @Override
     public Optional<String> handle(MetaRequestDto requestDto) {
         if (Optional.ofNullable(requestDto.scenarioDto()).orElse(List.of()).isEmpty()) {
-            Optional<ScenarioDto> lastScenario = scenarioStorage.findLastAlertByChatId(requestDto.chatId());
-            if (lastScenario.isEmpty()) {
+            Optional<ScenarioDto> lastScenarioO = scenarioStorage.findLastAlertByChatId(requestDto.chatId());
+            if (lastScenarioO.isEmpty()) {
                 return Optional.of("Ничего не делается");
             }
+            ScenarioDto lastScenario = lastScenarioO.get();
+            String keyInRedis = lastScenario.getUuid().toString();
 
-            repository.removeFromIndex(lastScenario.get().getUuid().toString());
-            return Optional.of("Эскалация остановлена для сценария: " + lastScenario.get().getName());
+            repository.remove(keyInRedis);
+            if (repository.isInDuplicates(keyInRedis)) {
+                lateOk(lastScenario);
+            }
+            repository.saveConfirm(keyInRedis);
+
+            return Optional.of("Эскалация остановлена для сценария: " + lastScenario.getName());
         } else if (Optional.ofNullable(requestDto.scenarioDto().getFirst().getAllowedDelayAfterPing()).isPresent()) {
             Optional<ScenarioDto> nextScenario = scenarioStorage.findNextAlertByChatId(requestDto.chatId());
             if (nextScenario.isEmpty()) {
@@ -57,6 +75,17 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
         }
 
         return Optional.empty();
+    }
+
+    private void lateOk(ScenarioDto scenarioDto) {
+        clientStorage.findByChatId(scenarioDto.getClientId())
+                .map(client -> {
+                    ScenarioDto build = scenarioDto.toBuilder()
+                            .text(String.format(TEXT_FOR_LATE_OK, client.getName()))
+                            .build();
+                    return IncidentMetadataDto.parse(build, client);
+                })
+                .ifPresent(inc -> senderService.send(List.of(inc), false));
     }
 
 
