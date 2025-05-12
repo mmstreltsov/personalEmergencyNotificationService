@@ -16,7 +16,8 @@ public record IncidentMetadataDto(
         String telegramId,
         String username,
         Long chatId,
-        List<FriendMetaDto> listOfFriends
+        List<FriendMetaDto> listOfFriends,
+        List<Long> friendIds
 ) {
 
     public static IncidentMetadataDto parse(ScenarioDto scenarioDto, ClientDto clientDto) {
@@ -31,6 +32,7 @@ public record IncidentMetadataDto(
                 clientDto.getTelegramId(),
                 clientDto.getName(),
                 clientDto.getChatId(),
-                clientDto.getListOfFriends().stream().map(FriendMetaDto::parse).toList());
+                clientDto.getListOfFriends().stream().map(FriendMetaDto::parse).toList(),
+                scenarioDto.getFriendsIds());
     }
 }
