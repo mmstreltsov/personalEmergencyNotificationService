@@ -11,6 +11,8 @@ import ru.hse.mmstr_project.se.service.storage.ScenarioStorage;
 import ru.hse.mmstr_project.se.storage.common.dto.CreateScenarioDto;
 import ru.hse.mmstr_project.se.storage.common.dto.ScenarioDto;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -60,9 +62,24 @@ public class UpdateScenarioHandlerImpl implements MetaRequestHandler {
                 .map(it -> updating(scenario, it))
                 .map(CreateScenarioDto::new)
                 .toList();
+        if (!validateTimings(result)) {
+            return Optional.of("Интервалы между проверками меньше 5 минут. Увеличьте интервалы для сохранения");
+        }
 
         saveAndDelete(result, scenarios.stream().map(ScenarioDto::getId).toList());
         return Optional.empty();
+    }
+
+    private static boolean validateTimings(List<CreateScenarioDto> scenarios) {
+        List<Instant> list = scenarios.stream().map(CreateScenarioDto::getFirstTimeToActivate)
+                .sorted((a, b) -> a.equals(b) ? 0 : a.isAfter(b) ? 1 : -1)
+                .toList();
+        for (int i = 0; i < list.size() - 1; i++) {
+            if (list.get(i).plus(295, ChronoUnit.SECONDS).isAfter(list.get(i + 1))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private List<ScenarioDto> findAllByScenario(ScenarioDto scenarioDto, Long chatId) {
