@@ -11,9 +11,11 @@ import ru.hse.mmstr_project.se.storage.common.dto.ClientDto;
 import ru.hse.mmstr_project.se.storage.common.dto.FriendDto;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class UpdateFriendHandlerImpl implements MetaRequestHandler {
@@ -53,7 +55,7 @@ public class UpdateFriendHandlerImpl implements MetaRequestHandler {
             return Optional.of(String.format("""
                     Внимание, ваш контакт может получить сообщение в телеграм только после подписки на вас через бота.
                     Перешлите ему это сообщение:
-                    
+                                        
                     `Зайдите в телеграм-бота @EmergencyNotificationsSender_bot и выполните /start и /subscribe %s`
                     """, requestDto.chatId().toString()));
         }
@@ -62,10 +64,24 @@ public class UpdateFriendHandlerImpl implements MetaRequestHandler {
     }
 
     private void updating(FriendDto fromDb, FriendDto toDb) {
+        Set<String> wayToNotify = new HashSet<>(fromDb.getWayToNotify());
+
         Optional.ofNullable(toDb.getName()).ifPresent(fromDb::setName);
-        Optional.ofNullable(toDb.getEmail()).ifPresent(fromDb::setEmail);
-        Optional.ofNullable(toDb.getTelegramId()).ifPresent(fromDb::setTelegramId);
-        Optional.ofNullable(toDb.getPhoneNumber()).ifPresent(fromDb::setPhoneNumber);
+        Optional.ofNullable(toDb.getEmail()).ifPresent(it -> {
+            wayToNotify.add("email");
+            fromDb.setWayToNotify(wayToNotify.stream().toList());
+            fromDb.setEmail(it);
+        });
+        Optional.ofNullable(toDb.getTelegramId()).ifPresent(it -> {
+            wayToNotify.add("tg");
+            fromDb.setWayToNotify(wayToNotify.stream().toList());
+            fromDb.setTelegramId(it);
+        });
+        Optional.ofNullable(toDb.getPhoneNumber()).ifPresent(it -> {
+            wayToNotify.add("sms");
+            fromDb.setWayToNotify(wayToNotify.stream().toList());
+            fromDb.setPhoneNumber(it);
+        });
         Optional.ofNullable(toDb.getWayToNotify()).ifPresent(fromDb::setWayToNotify);
     }
 
