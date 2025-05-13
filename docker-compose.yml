@@ -11,6 +11,7 @@ services:
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - JASYPT_MY_MAIN_SECRET_IS=${JASYPT_MY_MAIN_SECRET_IS}
+      - JAVA_OPTS=-Xmx256m -Xms128m
     ports:
       - "8080:8080"
     depends_on:
@@ -22,6 +23,13 @@ services:
         condition: service_healthy
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.3'
+          memory: 300M
+        reservations:
+          memory: 128M
 
   postgres:
     image: postgres:latest
@@ -38,13 +46,13 @@ services:
     networks:
       - app-network
     command: >
-      postgres -c max_connections=100
-               -c shared_buffers=256MB
-               -c effective_cache_size=768MB
-               -c maintenance_work_mem=64MB
+      postgres -c max_connections=30
+               -c shared_buffers=64MB
+               -c effective_cache_size=128MB
+               -c maintenance_work_mem=16MB
                -c checkpoint_completion_target=0.7
-               -c wal_buffers=16MB
-               -c default_statistics_target=100
+               -c wal_buffers=4MB
+               -c default_statistics_target=50
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U user -d postgres" ]
       interval: 30s
@@ -53,6 +61,13 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 150M
+        reservations:
+          memory: 64M
 
   redis:
     image: redis:latest
@@ -63,16 +78,23 @@ services:
     command: >
       redis-server
       --appendonly yes
-      --maxclients 500
+      --maxclients 100
       --auto-aof-rewrite-percentage 100
-      --auto-aof-rewrite-min-size 64mb
-      --tcp-backlog 128
+      --auto-aof-rewrite-min-size 32mb
+      --tcp-backlog 64
       --tcp-keepalive 60
-      --maxmemory 2gb
+      --maxmemory 100mb
       --maxmemory-policy noeviction
     restart: always
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 120M
+        reservations:
+          memory: 32M
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.4.0
@@ -85,6 +107,8 @@ services:
       ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 1
       ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
       ZOOKEEPER_MAX_CLIENT_CNXNS: 60
+      KAFKA_HEAP_OPTS: "-Xmx128m -Xms64m"
+      JVMFLAGS: "-Xmx128m -Xms64m"
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-log:/var/lib/zookeeper/log
@@ -95,7 +119,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 150M
+        reservations:
+          memory: 64M
 
   kafka:
     image: confluentinc/cp-kafka:7.4.0
@@ -117,6 +147,7 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       KAFKA_CONTROLLED_SHUTDOWN_ENABLE: "true"
       KAFKA_AUTO_LEADER_REBALANCE_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx192m -Xms96m"
     volumes:
       - kafka-data:/var/lib/kafka/data
       - ./kafka/init.sh:/tmp/init-kafka.sh
@@ -138,6 +169,13 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 250M
+        reservations:
+          memory: 96M
 
   prometheus:
     image: prom/prometheus:latest
@@ -153,9 +191,19 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
+      - '--storage.tsdb.retention.time=7d'
+      - '--query.max-samples=10000'
+      - '--query.timeout=2m'
     restart: always
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 96M
+        reservations:
+          memory: 32M
 
   grafana:
     image: grafana/grafana:latest
@@ -169,9 +217,20 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_ANALYTICS_REPORTING_ENABLED=false
+      - GF_ALERTING_ENABLED=false
+      - GF_PLUGINS_ENABLE_ALPHA=false
+      - GF_AUTH_PROXY_ENABLED=false
     restart: always
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 96M
+        reservations:
+          memory: 32M
 
 volumes:
   pgdata:
