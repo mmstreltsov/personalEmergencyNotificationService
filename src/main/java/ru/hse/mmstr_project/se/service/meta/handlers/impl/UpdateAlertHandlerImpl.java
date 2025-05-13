@@ -68,13 +68,15 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
                             .build())
                     .ifPresent(scenarioStorage::save);
 
-            ScenarioDto scenarioDto = nextScenario.get();
-            String keyInRedis = scenarioDto.getUuid().toString();
+            nextScenario.ifPresent(sc -> {
+                String keyInRedis = sc.getUuid().toString();
 
-            repository.remove(keyInRedis);
-            if (repository.isInDuplicates(keyInRedis)) {
-                lateOk(scenarioDto, TEXT_FOR_LATE_DELAY);
-            }
+                repository.remove(keyInRedis);
+                if (repository.isInDuplicates(keyInRedis)) {
+                    lateOk(sc, TEXT_FOR_LATE_DELAY);
+                }
+            });
+
         } else if (Optional.ofNullable(requestDto.scenarioDto().getFirst().getOkByHand()).orElse(false)) {
             Optional<ScenarioDto> nextScenario = scenarioStorage.findNextAlertByChatId(requestDto.chatId());
             if (nextScenario.isEmpty()) {
@@ -83,14 +85,6 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
 
             nextScenario.map(it -> it.toBuilder().firstTimeToActivate(CreateScenarioHandlerImpl.NEVER).build())
                     .ifPresent(scenarioStorage::save);
-
-            ScenarioDto scenarioDto = nextScenario.get();
-            String keyInRedis = scenarioDto.getUuid().toString();
-
-            repository.remove(keyInRedis);
-            if (repository.isInDuplicates(keyInRedis)) {
-                lateOk(scenarioDto, TEXT_FOR_LATE_OK);
-            }
         }
 
         return Optional.empty();
