@@ -8,5 +8,5 @@ CREATE INDEX scenarios_chat_ids
 CREATE INDEX scenarios_uuid
     ON Scenario (uuid);
 
-CREATE INDEX clients_telegram_id
-    ON Clients (telegramId);
+CREATE INDEX clients_chatId
+    ON Clients (chatId);

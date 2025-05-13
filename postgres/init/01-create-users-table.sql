@@ -12,8 +12,8 @@ CREATE TABLE Clients (
 --      <string>
 --    ],
 --    "phoneNumber": <string>,
---    "telegramId": <integer>,
---    "chatId": <integer>,
+--    "telegramId": <string>,
+--    "chatId": <long>,
 --    "email": <string>
 --  }
 
