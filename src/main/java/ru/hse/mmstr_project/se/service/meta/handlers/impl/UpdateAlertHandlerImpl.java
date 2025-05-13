@@ -21,6 +21,7 @@ import java.util.Optional;
 public class UpdateAlertHandlerImpl implements MetaRequestHandler {
 
     private static final String TEXT_FOR_LATE_OK = "Ложная тревога, Ваш друг %s прислал подтверждение что все хорошо.";
+    private static final String TEXT_FOR_LATE_DELAY = "Ложная тревога, Ваш друг %s отодвинул проверку.";
 
     private final ScenarioStorage scenarioStorage;
     private final ClientStorage clientStorage;
@@ -50,7 +51,7 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
 
             repository.remove(keyInRedis);
             if (repository.isInDuplicates(keyInRedis)) {
-                lateOk(lastScenario);
+                lateOk(lastScenario, TEXT_FOR_LATE_OK);
             }
             repository.saveConfirm(keyInRedis);
 
@@ -62,8 +63,20 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
             }
 
             Integer delay = requestDto.scenarioDto().getFirst().getAllowedDelayAfterPing();
-            nextScenario.map(it -> it.toBuilder().firstTimeToActivate(it.getFirstTimeToActivate().plus(delay, ChronoUnit.MINUTES)).build())
+            nextScenario.map(it -> it.toBuilder()
+                            .firstTimeToActivate(it.getFirstTimeToActivate().plus(delay, ChronoUnit.MINUTES))
+                            .build())
                     .ifPresent(scenarioStorage::save);
+
+            nextScenario.ifPresent(sc -> {
+                String keyInRedis = sc.getUuid().toString();
+
+                repository.remove(keyInRedis);
+                if (repository.isInDuplicates(keyInRedis)) {
+                    lateOk(sc, TEXT_FOR_LATE_DELAY);
+                }
+            });
+
         } else if (Optional.ofNullable(requestDto.scenarioDto().getFirst().getOkByHand()).orElse(false)) {
             Optional<ScenarioDto> nextScenario = scenarioStorage.findNextAlertByChatId(requestDto.chatId());
             if (nextScenario.isEmpty()) {
@@ -77,11 +90,11 @@ public class UpdateAlertHandlerImpl implements MetaRequestHandler {
         return Optional.empty();
     }
 
-    private void lateOk(ScenarioDto scenarioDto) {
+    private void lateOk(ScenarioDto scenarioDto, String text) {
         clientStorage.findByChatId(scenarioDto.getClientId())
                 .map(client -> {
                     ScenarioDto build = scenarioDto.toBuilder()
-                            .text(String.format(TEXT_FOR_LATE_OK, client.getName()))
+                            .text(String.format(text, client.getName()))
                             .build();
                     return IncidentMetadataDto.parse(build, client);
                 })
