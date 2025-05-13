@@ -149,14 +149,11 @@ services:
     volumes:
       - kafka-data:/var/lib/kafka/data
       - ./kafka/init.sh:/tmp/init-kafka.sh
-      - ./kafka/clear-zk.sh:/tmp/clear-zk.sh
     networks:
       - app-network
     command: >
       bash -c "
-        sleep 5 &&
-        chmod +x /tmp/clear-zk.sh &&
-        /tmp/clear-zk.sh && /etc/confluent/docker/run &
+        sleep 5 && /etc/confluent/docker/run &
         sleep 10 &&
         chmod +x /tmp/init-kafka.sh && 
         /tmp/init-kafka.sh &&
