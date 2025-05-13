@@ -30,6 +30,7 @@ public class TelegramBotMainSender extends DefaultAbsSender {
         try {
             execute(message);
         } catch (TelegramApiException ignored) {
+            throw new RuntimeException();
         }
     }
 

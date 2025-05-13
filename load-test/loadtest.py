@@ -101,11 +101,11 @@ def load_test(delay_ms):
                     "uuid": u,
                     "name": f"Scenario {i+1}",
                     "text": f"This is scenario number {i+1}",
-                    "client_id": 1,
+                    "client_id": 11,
                     "friend_ids": [],
                     "first_time_to_activate": first_time,
                     "first_time_to_activate_origin": first_time,
-                    "allowed_delay_after_ping": 60,
+                    "allowed_delay_after_ping": 0,
                     "ok_from_antispam": True,
                     "ok_by_hand": True,
                     "text_to_ping": f"Ping text for scenario {i+1}"
@@ -114,11 +114,11 @@ def load_test(delay_ms):
                     "uuid": u,
                     "name": f"Scenario {i+1}",
                     "text": f"This is scenario number {i+1}",
-                    "client_id": 1,
+                    "client_id": 11,
                     "friend_ids": [],
                     "first_time_to_activate": second_time,
                     "first_time_to_activate_origin": second_time,
-                    "allowed_delay_after_ping": 60,
+                    "allowed_delay_after_ping": 0,
                     "ok_from_antispam": True,
                     "ok_by_hand": True,
                     "text_to_ping": f"Ping text for scenario {i+1}"
@@ -149,7 +149,7 @@ def multi_threaded_load_test(num_threads=1, delay_ms=300):
 
 if __name__ == "__main__":
     try:
-        multi_threaded_load_test(1, 1000)
+        multi_threaded_load_test(1, 100)
     except KeyboardInterrupt:
         print("Test interrupted by user")
     finally:

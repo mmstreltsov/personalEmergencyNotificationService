@@ -79,8 +79,20 @@ public class CommonSchedulerManager {
 
     @Transactional
     public void handleLostPart(Collection<ScenarioDto> scenarios) {
-        Map<String, ScenarioDto> collect = scenarios.stream()
+        List<ScenarioDto> scenarioDtos = scenarios.stream()
                 .filter(it -> it.getOkFromAntispam() && it.getOkByHand())
+                .toList();
+
+        Set<Long> userIds = scenarioDtos.stream().map(ScenarioDto::getClientId).collect(Collectors.toSet());
+        Map<Long, ClientDto> idToClient = clientStorage.findAllByChatIds(userIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        ClientDto::getChatId,
+                        Function.identity(),
+                        (f, s) -> s));
+
+        Map<String, ScenarioDto> collect = scenarioDtos.stream()
+                .filter(it -> idToClient.containsKey(it.getClientId()))
                 .collect(Collectors.toMap(
                         it -> it.getUuid().toString(),
                         it -> it,

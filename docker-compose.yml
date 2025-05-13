@@ -22,14 +22,6 @@ services:
         condition: service_healthy
     networks:
       - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 2G
-        reservations:
-          cpus: '0.3'
-          memory: 512M
 
   postgres:
     image: postgres:latest
@@ -45,14 +37,6 @@ services:
       - ./postgres/init:/docker-entrypoint-initdb.d
     networks:
       - app-network
-    deploy:
-      resources:
-        limits:
-          cpus: '0.8'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
     command: >
       postgres -c max_connections=100
                -c shared_buffers=256MB
