@@ -97,33 +97,31 @@ services:
           memory: 32M
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.4.0
+    image: zookeeper:3.7.1
     container_name: zookeeper
     ports:
       - "2181:2181"
     environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 1
-      ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
-      ZOOKEEPER_MAX_CLIENT_CNXNS: 60
-      KAFKA_HEAP_OPTS: "-Xmx128m -Xms64m"
-      JVMFLAGS: "-Xmx128m -Xms64m"
+      ZOO_TICK_TIME: 2000
+      ZOO_MAX_CLIENT_CNXNS: 10
+      ZOO_4LW_COMMANDS_WHITELIST: "ruok,srvr,conf,stat"
+      JVMFLAGS: "-Xmx64m -Xms32m"
     volumes:
-      - zookeeper-data:/var/lib/zookeeper/data
-      - zookeeper-log:/var/lib/zookeeper/log
+      - zookeeper-data:/data
+      - zookeeper-log:/datalog
     networks:
       - app-network
     healthcheck:
-      test: [ "CMD", "nc", "-z", "localhost", "2181" ]
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
     deploy:
       resources:
         limits:
-          cpus: '0.2'
-          memory: 150M
+          cpus: '0.1'
+          memory: 100M
         reservations:
           memory: 64M
 
