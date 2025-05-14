@@ -40,6 +40,7 @@ public class TelegramBotMainSender extends DefaultAbsSender {
         for (String character : specialChars) {
             text = text.replace(character, "\\" + character);
         }
+        text = text.replace("UNDERLINING", "_");
         return text;
     }
 

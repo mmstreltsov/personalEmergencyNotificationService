@@ -93,11 +93,11 @@ public class HelpHandler implements CommandHandler {
 
             Быстрый старт:
             `/start`
-            `/add\\_contact`
-            `/set\\_contact\\_data 1 tg ?`
-            `/add\\_scenario ahaha`
-            `/set\\_contacts\\_to_scenario ahaha 1`
-            `/set\\_check\\_times ahaha 2025-05-16T00:00:01Z`
+            `/addUNDERLININGcontact`
+            `/setUNDERLININGcontactUNDERLININGdata 1 tg ?`
+            `/addUNDERLININGscenario ahaha`
+            `/setUNDERLININGcontactsUNDERLININGtoUNDERLININGscenario ahaha 1`
+            `/setUNDERLININGcheckUNDERLININGtimes ahaha 2025-05-16T00:00:01Z`
             `/sos`
             """;
 

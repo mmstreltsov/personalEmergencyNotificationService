@@ -18,7 +18,7 @@ public class TelegramBotSubscriptionsReceiver extends TelegramLongPollingBot {
 
     private static final String HELP_TEXT = """
             Бот для определения подписки на состояние пользователей.
-                        
+
             /subscribe {id} -- подписаться на пользователя
             /unsubscribe {id} -- отписаться от пользователя пользователя
             /help -- вывести это сообщение

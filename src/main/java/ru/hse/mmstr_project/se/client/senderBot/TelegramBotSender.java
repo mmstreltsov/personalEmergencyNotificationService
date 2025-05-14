@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.ByteArrayInputStream;
+import java.util.List;
 
 @Component
 public class TelegramBotSender extends DefaultAbsSender {
@@ -23,7 +24,7 @@ public class TelegramBotSender extends DefaultAbsSender {
         if (photo == null || photo.length == 0) {
             SendMessage message = new SendMessage();
             message.setChatId(chatId);
-            message.setText(text);
+            message.setText(forMarkdown(text));
             message.setParseMode("MarkDown");
 
             try {
@@ -44,5 +45,15 @@ public class TelegramBotSender extends DefaultAbsSender {
             } catch (TelegramApiException ignored) {
             }
         }
+    }
+
+    private String forMarkdown(String text) {
+        List<String> specialChars = List.of("_", "*", "[");
+
+        for (String character : specialChars) {
+            text = text.replace(character, "\\" + character);
+        }
+        text = text.replace("UNDERLINING", "_");
+        return text;
     }
 }
