@@ -14,13 +14,15 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @Component
 public class CreateScenarioHandlerImpl implements MetaRequestHandler {
 
     public static final Instant NEVER = Instant.ofEpochSecond(9224318015999L); // max timestamp in postgres
 
-    public static final String DEFAULT_SCENARIO_NAME = "Scenario-" + Instant.now().getNano();
+    public static final Supplier<String> DEFAULT_SCENARIO_NAME = () -> "Scenario-" + Instant.now().getEpochSecond();
+
     public static final String DEFAULT_SCENARIO_TEXT = "Я в беде";
     public static final String DEFAULT_SCENARIO_PING = "С вами все хорошо? Отправьте /confirm для остановки эскалации";
 
@@ -57,7 +59,7 @@ public class CreateScenarioHandlerImpl implements MetaRequestHandler {
     private CreateScenarioDto getDefaultCreateScenarioDto(Long chatId) {
         return new CreateScenarioDto(
                 UUID.randomUUID(),
-                DEFAULT_SCENARIO_NAME,
+                DEFAULT_SCENARIO_NAME.get(),
                 DEFAULT_SCENARIO_TEXT,
                 chatId,
                 List.of(),
