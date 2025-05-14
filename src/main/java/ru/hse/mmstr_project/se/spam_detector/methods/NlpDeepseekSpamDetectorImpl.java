@@ -14,8 +14,8 @@ public class NlpDeepseekSpamDetectorImpl extends AbstractApiModelsDetectorImpl i
     private static final Logger log = LoggerFactory.getLogger(NlpDeepseekSpamDetectorImpl.class);
 
     private static final String API_URL = "https://openrouter.ai/api/v1/chat/completions";
-    private static final String JSON = "{'model': 'deepseek/deepseek-chat:free',\n" +
-            " 'messages': [{'role': 'user', 'content': '%s'}]}";
+    private static final String JSON = "{\"model\": \"deepseek/deepseek-chat:free\",\n" +
+            " \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}]}";
     private static final String NLP_PROMPT =
             "Сервис помощи людям в экстренной ситуации. Определи, является ли этот текст спамом, ответь только Да или Нет: ";
 

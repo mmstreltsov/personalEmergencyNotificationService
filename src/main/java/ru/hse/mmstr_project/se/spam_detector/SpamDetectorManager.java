@@ -12,7 +12,7 @@ import java.util.concurrent.TimeoutException;
 
 @Component
 public class SpamDetectorManager {
-    private static final long WAITING_TIME_IN_MS = 1_000;
+    private static final long WAITING_TIME_IN_MS = 5_000;
 
     private final List<SpamDetector> spamDetector;
     private final ExecutorService executor;

@@ -30,13 +30,15 @@ public class HelpHandler implements CommandHandler {
 
             /set_contact_data {id} {Способ уведомления} {Данные}
             Устанавливает необходимые данные (например, номер телефона, email или Telegram-ID).
+            Телеграмм: без @
+            Телефон: 7*****
 
             /remove_contact {id}
             Удаляет контакт из списка доверенных лиц.
          
             /list_contacts
             Выводит список всех добавленных контактов.
-            ________________________________________________________
+            ________________________________
             
             Обработка сценариев:
             
@@ -73,7 +75,7 @@ public class HelpHandler implements CommandHandler {
 
             /list_scenarios
             Выводит список доступных сценариев.
-            ________________________________________________________
+            ________________________________
             
             Обработка алертов:
             /confirm
@@ -87,17 +89,16 @@ public class HelpHandler implements CommandHandler {
 
             /skip_next_alert
             Показывает время срабатывания ближайшего сценария
-            ________________________________________________________
-
+            ________________________________
 
             Быстрый старт:
             `/start`
-            `/add_contact`
-            `/set_contact_data 1 tg ?`
-            `/add_scenario ahaha`
-            `/set_contacts_to_scenario ahaha 1`
-            `/set_contacts_to_scenario ahaha 1`
-            `/set_check_times ahaha 2025-05-16T00:00:01Z`
+            `/add\\_contact`
+            `/set\\_contact\\_data 1 tg ?`
+            `/add\\_scenario ahaha`
+            `/set\\_contacts\\_to_scenario ahaha 1`
+            `/set\\_check\\_times ahaha 2025-05-16T00:00:01Z`
+            `/sos`
             """;
 
     @Override
