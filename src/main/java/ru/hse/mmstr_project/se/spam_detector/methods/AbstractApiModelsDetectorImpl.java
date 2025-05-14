@@ -32,7 +32,6 @@ public class AbstractApiModelsDetectorImpl {
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
         if (response.statusCode() == 200) {
             return response.body().toLowerCase().contains(YES);
         } else {

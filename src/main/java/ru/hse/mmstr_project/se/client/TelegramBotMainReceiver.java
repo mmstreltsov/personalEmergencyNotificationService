@@ -9,6 +9,7 @@ import ru.hse.mmstr_project.se.client.handlers.impl.SosButtonHandler;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Component
@@ -56,6 +57,9 @@ public class TelegramBotMainReceiver extends TelegramLongPollingBot {
 
         String messageText = update.getMessage().getText().trim();
         Long chatId = update.getMessage().getChatId();
+        if (Objects.isNull(chatId)) {
+            return;
+        }
 
         String[] input = messageText.split(SPACE);
         try {
@@ -68,7 +72,6 @@ public class TelegramBotMainReceiver extends TelegramLongPollingBot {
                     .orElse(Optional.of(ERROR_CASE))
                     .ifPresent(response -> telegramBotMainSender.sendMessage(chatId, response));
         } catch (Exception e) {
-            System.out.println(e);
             telegramBotMainSender.sendMessage(chatId, RUNTIME_ERROR_CASE);
         }
     }

@@ -61,6 +61,9 @@ public class ReadScenarioHandlerImpl implements MetaRequestHandler {
                 .append(value.toBeautyString())
                 .append(ScenarioDto.timesToString(timesToActivate.get(key)))
                 .append("\n\n"));
+        if (response.isEmpty()) {
+            return Optional.of("У вас нет заведенных сценариев");
+        }
 
         return Optional.of(response.toString());
     }

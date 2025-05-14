@@ -25,18 +25,30 @@ public class SpamDetectorManager {
     }
 
     public boolean isSpam(String obj) {
-        List<CompletableFuture<Boolean>> list = spamDetector.stream()
+        List<CompletableFuture<Boolean>> futures = spamDetector.stream()
                 .map(it -> CompletableFuture.supplyAsync(() -> it.isSpam(obj), executor))
                 .toList();
 
-        CompletableFuture<Boolean> future = CompletableFuture
-                .anyOf(list.toArray(new CompletableFuture[0]))
-                .thenApply(res -> (Boolean) res);
-
         try {
-            return future.get(WAITING_TIME_IN_MS, TimeUnit.MILLISECONDS);
+            CompletableFuture<List<Boolean>> allFutures = CompletableFuture.allOf(
+                            futures.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> futures.stream()
+                            .map(CompletableFuture::join)
+                            .toList());
+
+            List<Boolean> results = allFutures.get(WAITING_TIME_IN_MS, TimeUnit.MILLISECONDS);
+            return results.stream().anyMatch(Boolean::booleanValue);
+
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
-            return false;
+            return futures.stream()
+                    .filter(CompletableFuture::isDone)
+                    .anyMatch(f -> {
+                        try {
+                            return f.getNow(false);
+                        } catch (Exception ex) {
+                            return false;
+                        }
+                    });
         }
     }
 }
