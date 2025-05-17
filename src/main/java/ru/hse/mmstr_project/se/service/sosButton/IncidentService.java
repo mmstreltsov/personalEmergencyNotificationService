@@ -65,16 +65,18 @@ public class IncidentService {
             Double longitude = incidentDto.longitude().get();
             Double latitude = incidentDto.latitude().get();
 
-            helpText = HELP_TEXT_WITH_DATA + "Координаты: " + latitude + ", " + longitude + "; " + String.format("https://yandex.ru/maps/?ll=%s%%2C%s&z=18", longitude, latitude);
+            helpText = String.format(HELP_TEXT_WITH_DATA, clientDto.getName(), clientDto.getTelegramId())
+                    + "Координаты: " + latitude + ", " + longitude + "; "
+                    + String.format("https://yandex.ru/maps/?ll=%s%%2C%s&z=18", longitude, latitude);
             photo = photoByCoordinates.getPhotoByCoordinates(longitude, latitude).orElse(null);
         } else {
-            helpText = HELP_TEXT;
+            helpText = String.format(HELP_TEXT, clientDto.getName(), clientDto.getTelegramId());
             photo = null;
         }
 
         clientDto.getListOfFriends().stream().map(
                 friend -> new SenderRequestDto(
-                        format(helpText, clientDto.getName(), clientDto.getTelegramId()),
+                        helpText,
                         false,
                         photo,
                         clientDto.getName(),
@@ -84,9 +86,5 @@ public class IncidentService {
                         friend.getChatId(),
                         friend.getEmail())
         ).forEach(senderService::sendOne);
-    }
-
-    private String format(String text, Object... data) {
-        return String.format(text, data);
     }
 }
