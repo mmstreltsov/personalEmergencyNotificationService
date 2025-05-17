@@ -20,8 +20,8 @@ import java.util.stream.Collectors;
 @Component
 public class IncidentService {
 
-    private final static String HELP_TEXT = "Ваш друг нажал тревожную кнопку. Свяжитесь с ним!";
-    private final static String HELP_TEXT_WITH_DATA = "Ваш друг прикрепил данные.";
+    private final static String HELP_TEXT = "Ваш друг %s, %s нажал тревожную кнопку. Свяжитесь с ним!";
+    private final static String HELP_TEXT_WITH_DATA = "Ваш друг %s, %s прикрепил данные.";
 
     private final IncidentStorage incidentStorage;
     private final PhotoByCoordinates photoByCoordinates;
@@ -74,7 +74,7 @@ public class IncidentService {
 
         clientDto.getListOfFriends().stream().map(
                 friend -> new SenderRequestDto(
-                        helpText,
+                        format(helpText, clientDto.getName(), clientDto.getTelegramId()),
                         false,
                         photo,
                         clientDto.getName(),
@@ -84,5 +84,9 @@ public class IncidentService {
                         friend.getChatId(),
                         friend.getEmail())
         ).forEach(senderService::sendOne);
+    }
+
+    private String format(String text, Object... data) {
+        return String.format(text, data);
     }
 }
